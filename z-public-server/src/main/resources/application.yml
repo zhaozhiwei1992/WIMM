@@ -282,7 +282,7 @@ z:
     license: unlicensed
     license-url:
   swagger:
-    title: 赚钱机器
+    title: 钱呢
     description: 提供本系统引入所有模块的接口调试
     version: ${z.app.version}
     url: x
@@ -306,14 +306,12 @@ z:
       # url 白名单
       - /system/login
       - /api/system/login
+      - /api/system/register
       - /api/system/mobile/login/**
       - /actuator/**
       # 验证码
       - /captcha/numCode
       - /api/captcha/numCode
-      # 积木报表
-      - /jmreport/**
-      - /jimureport/**
       # swagger3
       - /swagger-ui/**
       - /doc.html

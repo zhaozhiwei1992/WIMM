@@ -7,8 +7,6 @@ import { ElButton, ElTag } from 'element-plus'
 import { Table } from '@/components/Table'
 import { getTableListApi, saveTableApi, delTableListApi } from '@/api/system/user'
 import { getRoleSelect } from '@/api/system/role'
-import { getDeptSelect } from '@/api/system/dept'
-import { getPositionSelect } from '@/api/system/position'
 import { useTable } from '@/hooks/web/useTable'
 import { TableData } from '@/api/table/types'
 import { ref, unref, reactive, h, onMounted } from 'vue'
@@ -38,20 +36,12 @@ getList()
 const { t } = useI18n()
 
 const roleOptions = ref<ComponentOptions[] | any>([])
-const deptOptions = ref<ComponentOptions[] | any>([])
-const positionOptions = ref<ComponentOptions[] | any>([])
 
 async function fetchOptions() {
   try {
     // 并行发起所有请求
-    const [roles, departments, positions] = await Promise.all([
-      getRoleSelect(),
-      getDeptSelect(),
-      getPositionSelect()
-    ])
+    const [roles] = await Promise.all([getRoleSelect()])
 
-    deptOptions.value = departments
-    positionOptions.value = positions
     roleOptions.value = roles
   } catch (error) {
     console.error('Failed to fetch options:', error)
@@ -107,32 +97,6 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     field: 'email',
     label: '邮箱'
-  },
-  {
-    field: 'departmentIdListStr',
-    label: '部门',
-    form: {
-      component: 'Cascader',
-      componentProps: {
-        style: {
-          width: '100%'
-        },
-        options: deptOptions
-      }
-    }
-  },
-  {
-    field: 'positionIdListStr',
-    label: '岗位',
-    form: {
-      component: 'Select',
-      componentProps: {
-        style: {
-          width: '100%'
-        },
-        options: positionOptions
-      }
-    }
   },
   {
     field: 'roleIdListStr',

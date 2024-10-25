@@ -55,20 +55,9 @@ public class CustomUserDetailService implements UserDetailsService {
             throw new UsernameNotFoundException("用户:" + username + ",不存在!");
         }
 
-        Set<String> permissionList;
-        if ("admin".equals(username)) {
-            permissionList =
-                    menuRepository.findAll().stream().map(Menu::getPermissionCode).collect(Collectors.toSet());
-        } else {
-            // 获取角色信息
-            final List<UserAuthority> userAuthorities = userAuthorityRepository.findAllByUserId(user.getId());
-            // 获取角色对菜单信息
-            final List<RoleMenu> roleMenuList =
-                    roleMenuRepository.findByRoleIdIn(userAuthorities.stream().map(UserAuthority::getRoleId).collect(Collectors.toList()));
-            // 获取权限信息
-            final List<Menu> allMenuList = menuRepository.findAllById(roleMenuList.stream().map(RoleMenu::getMenuId).collect(Collectors.toList()));
-            permissionList = allMenuList.stream().map(Menu::getPermissionCode).collect(Collectors.toSet());
-        }
+        // 内部使用，没必要分那么细的权限了
+        Set<String> permissionList =
+                menuRepository.findAll().stream().map(Menu::getPermissionCode).collect(Collectors.toSet());
         // 设置功能权限信息,方便后续校验 system:user:add之类的
         List<GrantedAuthority> grantedAuthorities = permissionList.stream()
                 .map(SimpleGrantedAuthority::new)

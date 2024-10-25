@@ -76,7 +76,6 @@ public class CustomStatementInspector implements StatementInspector {
             return newSql;
         } catch (Exception e) {
             log.error("组织筛选解析失败，解析SQL异常", e);
-            e.printStackTrace();
         }
         return null;
     }

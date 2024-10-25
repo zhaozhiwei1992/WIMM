@@ -123,28 +123,6 @@ public class UserResource {
         }).collect(Collectors.toList());
         userAuthorityRepository.saveAll(userAuthorities);
 
-        // 保存用户岗位信息
-        final String positionIdListStr = userVO.getPositionIdListStr();
-        final List<Long> positionIdList = Arrays.stream(positionIdListStr.split(",")).map(Long::valueOf).collect(Collectors.toList());
-        final List<UserPosition> userPositionList = positionIdList.stream().map(positionId -> {
-            final UserPosition userPosition = new UserPosition();
-            userPosition.setPositionId(positionId);
-            userPosition.setUserId(newUser.getId());
-            return userPosition;
-        }).collect(Collectors.toList());
-        userPositionRepository.saveAll(userPositionList);
-
-        // 保存用户部门信息
-        final String departmentIdListStr = userVO.getDepartmentIdListStr();
-        final List<Long> departmentIdList = Arrays.stream(departmentIdListStr.split(",")).map(Long::valueOf).collect(Collectors.toList());
-        final List<UserDepartment> userDepartmentList = departmentIdList.stream().map(departmentId -> {
-            final UserDepartment userDepartment = new UserDepartment();
-            userDepartment.setDeptId(departmentId);
-            userDepartment.setUserId(newUser.getId());
-            return userDepartment;
-        }).collect(Collectors.toList());
-        userDepartmentRepository.saveAll(userDepartmentList);
-
         return newUser;
     }
 

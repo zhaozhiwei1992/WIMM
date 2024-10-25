@@ -77,7 +77,7 @@ public class CustomPermissionFilter extends AbstractPermissionFilterTemplate {
 
         // 2. 根据用户名去加载数据库中所属角色对应的所有权限标识
         final Optional<User> oneByLogin = userRepository.findOneByLogin(principal.toString());
-        if (!oneByLogin.isPresent()) {
+        if (oneByLogin.isEmpty()) {
             return false;
         }
         final List<UserAuthority> roleList = userAuthorityRepository.findAllByUserId(oneByLogin.get().getId());

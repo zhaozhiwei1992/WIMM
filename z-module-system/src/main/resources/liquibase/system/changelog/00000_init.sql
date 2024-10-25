@@ -97,7 +97,7 @@ INSERT INTO sys_permissions (
 -- ----------------------------
 delete from sys_user;
 INSERT INTO sys_user
-(id, created_by, created_date, last_modified_by, last_modified_date, activated, image_url, login, name, password_hash)
+(id, created_by, created_date, last_modified_by, last_modified_date, activated, avatar, login, name, password_hash)
 VALUES
 (1, 'system', '2022-07-14 11:25:56.594', 'system', '2022-07-27 09:05:07.221', true, NULL, 'admin', '系统管理员', '$2a$10$Uaq/uIj3D5VZ4Y5.I7MTB.pMXka6FKuCNy4A.ZnnRk9GshwYxBQZG');
 
@@ -128,7 +128,6 @@ INSERT INTO sys_menu (
 -- 一级菜单
 (1, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:home-filled', TRUE, '首页',1, 0, TRUE, '/dashboard', '#', '0', 'dashboard:'),
 (2, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:setting-filled', TRUE, '系统管理',2, 0, TRUE, '/system', '#', '0', 'system:'),
-(3, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:code-outlined', TRUE, '开发者工具',3, 0, TRUE, '/tool', '#', '0', 'tool:'),
 (4, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:dashboard-filled', TRUE, '系统监控',4, 0, TRUE, '/monitor', '#', '0', 'monitor:'),
 (5, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:file-text-filled', TRUE, '动态报表',5, 0, TRUE, '/report', '#', '0', 'log:'),
 (6, 'system', NOW(), 'system', NOW(), NULL, TRUE, 'ant-design:file-text-filled', TRUE, '日志查看',6, 0, TRUE, '/log', '#', '0', 'log:'),
@@ -138,8 +137,6 @@ INSERT INTO sys_menu (
 (15, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '用户管理', 1, 2, TRUE, 'user', 'views/system/User/Index', '1', 'system:user:view'),
 (16, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '角色管理', 2, 2, TRUE, 'role', 'views/system/Role/Index', '1', 'system:role:view'),
 (17, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '菜单管理', 3, 2, TRUE, 'menu', 'views/system/Menu/Index', '1', 'system:menu:view'),
-(20, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '系统参数配置', 6, 2, TRUE, 'params', 'views/system/Param/Index', '1', 'system:params:view'),
-(21, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '基础要素维护', 7, 2, TRUE, 'ele-union', 'views/system/EleUnion/Index', '1', 'system:ele-union:view'),
 (22, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '定时任务管理', 8, 2, TRUE, 'task', 'views/framework/job/Index', '1', 'system:task:view'),
 (23, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '会计科目维护', 1, 7, TRUE, 'acct-cls', 'views/acct/cls/Index', '1', 'acct:cls:view'),
 (24, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记个账', 2, 7, TRUE, 'acct', 'views/acct/acct/Index', '1', 'acct:acct:view'),

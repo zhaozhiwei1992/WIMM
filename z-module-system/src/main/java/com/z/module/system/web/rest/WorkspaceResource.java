@@ -47,7 +47,7 @@ public class WorkspaceResource {
     @GetMapping("project")
     public List<ProjectVO> projectVO(){
         ProjectVO projectVO = new ProjectVO();
-        projectVO.setName("赚钱工具-plus");
+        projectVO.setName("钱呢");
         projectVO.setIcon("icon");
         projectVO.setMessage("一个牛皮的后端基础项目，完整的用户权限管理及基础设施");
         projectVO.setPersonal("是");

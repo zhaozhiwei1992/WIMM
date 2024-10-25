@@ -206,7 +206,7 @@ const getRole = async () => {
     // 登录后跳转指定地址, 或者路由第一个地址, 后端权限控制, 管理员是分析页, 普通用户是工作页
     console.log(redirect.value)
     console.log(permissionStore.addRouters[0].path)
-    push({ path: redirect.value || permissionStore.addRouters[0].path })
+    push({ path: '/dashboard/workplace' })
   }
 }
 
