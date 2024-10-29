@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Long> {
     void deleteAllByIdIn(List<Long> idList);
+
+    void deleteAllByVoucherNoIn(List<String> list);
 }

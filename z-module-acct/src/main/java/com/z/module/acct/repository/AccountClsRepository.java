@@ -1,6 +1,6 @@
 package com.z.module.acct.repository;
 
-import com.z.module.system.domain.AccountCls;
+import com.z.module.acct.domain.AccountCls;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

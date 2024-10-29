@@ -1,7 +1,7 @@
 package com.z.module.acct.web.mapper;
 
 import com.z.framework.common.web.vo.SelectOptionVO;
-import com.z.module.system.domain.AccountCls;
+import com.z.module.acct.domain.AccountCls;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

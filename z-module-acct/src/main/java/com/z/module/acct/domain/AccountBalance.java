@@ -21,7 +21,7 @@ public class AccountBalance extends AbstractAuditingEntity implements Serializab
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id; // 余额ID
+    private Long id; // 余额ID
 
     private String setYear; // 核算年度
 

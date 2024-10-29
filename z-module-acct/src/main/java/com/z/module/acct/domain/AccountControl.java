@@ -21,7 +21,7 @@ public class AccountControl extends AbstractAuditingEntity implements Serializab
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id; // 控制ID
+    private Long id; // 控制ID
 
     private String setYear; // 核算年度
 

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 // 忽略 IDEA 无法识别 ${z.app.base-package}
 @SuppressWarnings("SpringComponentScan")
-@SpringBootApplication(scanBasePackages = {"${z.app.base-package}.server", "${z.app.base-package}.module"})
+@SpringBootApplication(scanBasePackages = {"com.z.server", "com.z.module"})
 // 统一增加事务管理及 jpa的审计拦截
 @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
 @EnableTransactionManagement

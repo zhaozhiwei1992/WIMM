@@ -21,7 +21,7 @@ public class VoucherDetail extends AbstractAuditingEntity implements Serializabl
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id; // 凭证分录唯一标识
+    private Long id; // 凭证分录唯一标识
 
     private String voucherNo; // 核算凭证号
 

@@ -2,10 +2,10 @@ package com.z.module.acct.web.rest;
 
 import com.z.framework.common.util.GenericTreeBuilderUtil;
 import com.z.framework.common.web.vo.SelectOptionVO;
+import com.z.module.acct.domain.AccountCls;
 import com.z.module.acct.repository.AccountClsRepository;
 import com.z.module.acct.web.mapper.AccountClsSelectMapper;
 import com.z.module.acct.web.vo.AccountClsVO;
-import com.z.module.system.domain.AccountCls;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +25,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * @author zhaozhiwei
+ * @version V1.0
  * @Title: AccountClsResource
  * @Package com/z/module/acct/web/rest/AccountClsResource.java
  * @Description: 账户维护
- * @author zhaozhiwei
  * @date 2024/10/28 16:53
- * @version V1.0
  */
 @Tag(name = "账户维护API")
 @RestController
@@ -58,7 +57,7 @@ public class AccountClsResource {
      */
     @Operation(description = "新增会计科目")
     @PostMapping("/account-cls")
-    @PreAuthorize("hasAuthority('system:AccountCls:add')")
+//    @PreAuthorize("hasAuthority('acct:AccountCls:add')")
     public AccountCls createAccountCls(@RequestBody AccountCls accountCls) throws URISyntaxException {
 
         ExampleMatcher matcher = ExampleMatcher.matching();
@@ -82,7 +81,7 @@ public class AccountClsResource {
      */
     @Operation(description = "获取所有会计科目")
     @GetMapping("/account-cls")
-    @PreAuthorize("hasAuthority('system:AccountCls:view')")
+//    @PreAuthorize("hasAuthority('acct:AccountCls:view')")
     public HashMap<String, Object> getAllAccountCls(
             Pageable pageable, AccountCls AccountCls) {
         log.debug("REST request to get a page of UiComponents");
@@ -128,7 +127,7 @@ public class AccountClsResource {
      * 404 (Not Found)}.
      */
     @GetMapping("/account-cls/{id}")
-    @PreAuthorize("hasAuthority('system:AccountCls:view')")
+//    @PreAuthorize("hasAuthority('acct:AccountCls:view')")
     public AccountCls getAccountCls(@PathVariable Long id) {
         log.debug("REST request to get AccountCls : {}", id);
         Optional<AccountCls> accountCls = accountClsRepository.findById(id);
@@ -137,7 +136,7 @@ public class AccountClsResource {
 
     @Operation(description = "删除会计科目")
     @DeleteMapping("/account-cls")
-    @PreAuthorize("hasAuthority('system:AccountCls:delete')")
+//    @PreAuthorize("hasAuthority('acct:AccountCls:delete')")
     public String deleteAccountCls(@RequestBody List<Long> idList) {
         log.debug("REST request to delete Examples, ids: {}", idList);
         this.accountClsRepository.deleteAllByIdIn(idList);
@@ -146,21 +145,21 @@ public class AccountClsResource {
 
     @Operation(description = "获取所有一级会计科目")
     @GetMapping("/account-cls/root")
-    @PreAuthorize("hasAuthority('system:AccountCls:view')")
+//    @PreAuthorize("hasAuthority('acct:AccountCls:view')")
     public List<AccountCls> getAllRootAccountCls() {
         log.debug("REST request to get a page of account-cls");
 
         return accountClsRepository.findAllByParentIdOrderByOrderNumAsc(0L);
     }
 
-    @Operation(description = "获取会计科目树select")
+    @Operation(description = "获取科目树select")
     @GetMapping("/account-cls/select")
-    @PreAuthorize("hasAuthority('system:AccountCls:view')")
-    public List<SelectOptionVO> getAccountClsSelect() {
+//    @PreAuthorize("hasAuthority('acct:AccountCls:view')")
+    public List<SelectOptionVO> getAccountClsSelectInc() {
         log.debug("REST request to get AccountCls Select");
 
-        final List<AccountCls> AccountClsList = accountClsRepository.findAll();
-        final List<SelectOptionVO> convert = accountClsSelectMapper.convert(AccountClsList);
+        final List<AccountCls> accountClsList = accountClsRepository.findAll();
+        final List<SelectOptionVO> convert = accountClsSelectMapper.convert(accountClsList);
         final GenericTreeBuilderUtil<SelectOptionVO> genericTreeBuilderUtil = new GenericTreeBuilderUtil<>(SelectOptionVO.class);
         final List<SelectOptionVO> list = genericTreeBuilderUtil.buildTree(convert);
         log.info("左侧树构建: {}", list);
