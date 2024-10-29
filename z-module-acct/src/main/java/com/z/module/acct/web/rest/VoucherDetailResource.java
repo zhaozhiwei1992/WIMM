@@ -1,5 +1,6 @@
 package com.z.module.acct.web.rest;
 
+import com.z.framework.security.util.SecurityUtils;
 import com.z.module.acct.domain.VoucherDetail;
 import com.z.module.acct.repository.VoucherDetailRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,6 +60,11 @@ public class VoucherDetailResource {
                 .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith())
                 //忽略属性：是否关注。因为是基本类型，需要忽略掉
                 .withIgnorePaths("id", "createdDate", "lastModifiedDate");
+
+        String currentLoginName = SecurityUtils.getCurrentLoginName();
+        if(!"admin".equals(currentLoginName)){
+            voucherDetail.setCreatedBy(currentLoginName);
+        }
 
         //创建实例
         Example<VoucherDetail> ex = Example.of(voucherDetail, matcher);
