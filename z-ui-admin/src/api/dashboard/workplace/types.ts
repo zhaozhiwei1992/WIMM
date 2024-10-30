@@ -4,12 +4,11 @@ export type WorkplaceTotal = {
   todo: number
 }
 
-export type Project = {
-  name: string
-  icon: string
-  message: string
-  personal: string
-  time: Date | number | string
+// 资产统计数
+export type Asset = {
+  totalAssets: number
+  totalLiabilities: number
+  netWorth: number
 }
 
 export type Dynamic = {

@@ -1,109 +1,106 @@
 <script setup lang="ts">
-import { useTimeAgo } from '@/hooks/web/useTimeAgo'
 import { ElRow, ElCol, ElSkeleton, ElCard, ElDivider, ElLink } from 'element-plus'
 import { useI18n } from '@/hooks/web/useI18n'
 import { useAppStore } from '@/store/modules/app'
 import { ref, reactive, onMounted } from 'vue'
 import { CountTo } from '@/components/CountTo'
-import { formatTime } from '@/utils'
 import { Echart } from '@/components/Echart'
 import { EChartsOption } from 'echarts'
-import { radarOption } from './echarts-data'
-import { Highlight } from '@/components/Highlight'
-import {
-  getCountApi,
-  getProjectApi,
-  getDynamicApi,
-  getTeamApi,
-  getRadarApi
-} from '@/api/dashboard/workplace'
-import type { WorkplaceTotal, Project, Dynamic, Team } from '@/api/dashboard/workplace/types'
+import { lineOptions, pieOptions } from './echarts-data'
+import { getAssetsApi } from '@/api/dashboard/workplace'
 import { set } from 'lodash-es'
 import { useCache } from '@/hooks/web/useCache'
 
 const loading = ref(true)
 
-// 获取统计数
-let totalSate = reactive<WorkplaceTotal>({
-  project: 0,
-  access: 0,
-  todo: 0
-})
-
-const getCount = async () => {
-  const res = await getCountApi().catch(() => {})
-  if (res) {
-    totalSate = Object.assign(totalSate, res)
-  }
+// 总资产：Total Assets
+let totalAssets = ref(0)
+// 总负债：Total Liabilities
+let totalLiabilities = ref(0)
+//净资产：Net Worth
+let netWorth = ref(0)
+const getAsset = async () => {
+  const res = await getAssetsApi().catch(() => { })
+  totalAssets.value = res?.totalAssets || 0
+  totalLiabilities.value = res?.totalLiabilities || 0
+  netWorth.value = res?.netWorth || 0
 }
 
-let projects = reactive<Project[]>([])
+// 收入支出类别统计
+let incPieData = reactive<EChartsOption>(pieOptions) as EChartsOption
 
-// 获取项目数
-const getProject = async () => {
-  const res = await getProjectApi().catch(() => {})
-  if (res) {
-    projects = Object.assign(projects, res)
-  }
-}
-
-// 获取动态
-let dynamics = reactive<Dynamic[]>([])
-
-const getDynamic = async () => {
-  const res = await getDynamicApi().catch(() => {})
-  if (res) {
-    dynamics = Object.assign(dynamics, res)
-  }
-}
-
-// 获取团队
-let team = reactive<Team[]>([])
-
-const getTeam = async () => {
-  const res = await getTeamApi().catch(() => {})
-  if (res) {
-    team = Object.assign(team, res)
-  }
-}
-
-// 获取指数
-let radarOptionData = reactive<EChartsOption>(radarOption) as EChartsOption
-
-const getRadar = async () => {
-  const res = await getRadarApi().catch(() => {})
+// 收入饼图
+const getIncPieData = async () => {
+  const res = await getIncPieDataApi().catch(() => {})
   if (res) {
     set(
-      radarOptionData,
-      'radar.indicator',
-      res.map((v) => {
-        return {
-          name: t(v.name),
-          max: v.max
-        }
-      })
+      incPieData,
+      'legend.data',
+      res.map((v) => t(v.name))
     )
-    set(radarOptionData, 'series', [
+    incPieData!.series![0].data = res.map((v) => {
+      return {
+        name: t(v.name),
+        value: v.value
+      }
+    })
+  }
+}
+
+let expPieData = reactive<EChartsOption>(pieOptions) as EChartsOption
+const getExpPieData = async () => {
+  const res = await getExpPieDataApi().catch(() => {})
+  if (res) {
+    set(
+      incPieData,
+      'legend.data',
+      res.map((v) => t(v.name))
+    )
+    incPieData!.series![0].data = res.map((v) => {
+      return {
+        name: t(v.name),
+        value: v.value
+      }
+    })
+  }
+}
+
+// 收入支出趋势统计, 按月
+let incExpMonthLineData = reactive<EChartsOption>(lineOptions) as EChartsOption
+
+// 每月收入支出统计折线图
+const getMonthlyIncExpData = async () => {
+  const res = await getMonthlyIncExpDataApi().catch(() => {})
+  if (res) {
+    set(
+      incExpMonthLineData,
+      'xAxis.data',
+      res.map((v) => t(v.name))
+    )
+    set(incExpMonthLineData, 'series', [
       {
-        name: `xxx${t('workplace.index')}`,
-        type: 'radar',
-        data: [
-          {
-            value: res.map((v) => v.personal),
-            name: t('workplace.personal')
-          },
-          {
-            value: res.map((v) => v.team),
-            name: t('workplace.team')
-          }
-        ]
+        name: t('analysis.estimate'),
+        smooth: true,
+        type: 'line',
+        data: res.map((v) => v.estimate),
+        animationDuration: 2800,
+        animationEasing: 'cubicInOut'
+      },
+      {
+        name: t('analysis.actual'),
+        smooth: true,
+        type: 'line',
+        itemStyle: {},
+        data: res.map((v) => v.actual),
+        animationDuration: 2800,
+        animationEasing: 'quadraticOut'
       }
     ])
   }
 }
 
 const getAllApi = async () => {
-  await Promise.all([getCount(), getProject(), getDynamic(), getTeam(), getRadar()])
+  await Promise.all([getMonthlyIncExpData(), getAsset(), getIncPieData(), getExpPieData()])
   loading.value = false
 }
 
@@ -133,6 +130,7 @@ onMounted(() => {
     <ElCard shadow="never">
       <ElSkeleton :loading="loading" animated>
         <ElRow :gutter="20" justify="space-between">
+          <!-- 个人信息问候部分 -->
           <ElCol :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="flex items-center">
               <img :src="avatarImageUrl" alt="" class="w-70px h-70px rounded-[50%] mr-20px" />
@@ -146,36 +144,27 @@ onMounted(() => {
               </div>
             </div>
           </ElCol>
+          <!-- 资产负债统计 -->
           <ElCol :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="flex h-70px items-center justify-end <sm:mt-20px">
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.project') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.project"
-                  :duration="2600"
-                />
+                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.totalAssets') }}</div>
+                <CountTo class="text-20px" :start-val="0" :end-val="totalAssets" :duration="2600" />
               </div>
               <ElDivider direction="vertical" />
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.toDo') }}</div>
+                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.totalLabilities') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
-                  :end-val="totalSate.todo"
+                  :end-val="totalLiabilities"
                   :duration="2600"
                 />
               </div>
               <ElDivider direction="vertical" border-style="dashed" />
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.access') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.access"
-                  :duration="2600"
-                />
+                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.netWorth') }}</div>
+                <CountTo class="text-20px" :start-val="0" :end-val="netWorth" :duration="2600" />
               </div>
             </div>
           </ElCol>
@@ -185,67 +174,25 @@ onMounted(() => {
   </div>
 
   <ElRow class="mt-20px" :gutter="20" justify="space-between">
-    <ElCol :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-20px">
-      <ElCard shadow="never">
+    <ElCol :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-20px">
+      <!-- 收入分布饼图 -->
+      <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <div class="flex justify-between">
-            <span>{{ t('workplace.project') }}</span>
-            <ElLink type="primary" :underline="false">{{ t('workplace.more') }}</ElLink>
-          </div>
+          <span>收入{{ t('workplace.index') }}</span>
         </template>
-        <ElSkeleton :loading="loading" animated>
-          <ElRow>
-            <ElCol
-              v-for="(item, index) in projects"
-              :key="`card-${index}`"
-              :xl="8"
-              :lg="8"
-              :md="12"
-              :sm="24"
-              :xs="24"
-            >
-              <ElCard shadow="hover">
-                <div class="flex items-center">
-                  <Icon :icon="item.icon" :size="25" class="mr-10px" />
-                  <span class="text-16px">{{ item.name }}</span>
-                </div>
-                <div class="mt-15px text-14px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-20px text-12px text-gray-400 flex justify-between">
-                  <span>{{ item.personal }}</span>
-                  <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
-                </div>
-              </ElCard>
-            </ElCol>
-          </ElRow>
+        <ElSkeleton :loading="loading" animated :rows="4">
+          <Echart :options="incPieData" :height="350" />
         </ElSkeleton>
       </ElCard>
-
-      <ElCard shadow="never" class="mt-20px">
+    </ElCol>
+    <ElCol :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-20px">
+      <!-- 支出分布饼图 -->
+      <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <div class="flex justify-between">
-            <span>{{ t('workplace.dynamic') }}</span>
-            <ElLink type="primary" :underline="false">{{ t('workplace.more') }}</ElLink>
-          </div>
+          <span>支出{{ t('workplace.index') }}</span>
         </template>
-        <ElSkeleton :loading="loading" animated>
-          <div v-for="(item, index) in dynamics" :key="`dynamics-${index}`">
-            <div class="flex items-center">
-              <!-- <img
-                src="@/assets/imgs/avatar.jpg"
-                alt=""
-                class="w-35px h-35px rounded-[50%] mr-20px"
-              /> -->
-              <div>
-                <div class="text-14px">
-                  <!-- <Highlight :keys="item.keys.map((v) => t(v))">
-                    {{ t('workplace.pushCode') }}
-                  </Highlight> -->
-                  {{ item.msg }} {{ useTimeAgo(item.time) }}
-                </div>
-              </div>
-            </div>
-            <ElDivider />
-          </div>
+        <ElSkeleton :loading="loading" animated :rows="4">
+          <Echart :options="expPieData" :height="350" />
         </ElSkeleton>
       </ElCard>
     </ElCol>
@@ -254,9 +201,10 @@ onMounted(() => {
         <template #header>
           <span>{{ t('workplace.shortcutOperation') }}</span>
         </template>
+        <!-- 快捷操作 快速记账、报表查看 -->
         <ElSkeleton :loading="loading" animated>
           <ElCol
-            v-for="item in 9"
+            v-for="item in 5"
             :key="`card-${item}`"
             :xl="12"
             :lg="12"
@@ -271,31 +219,29 @@ onMounted(() => {
           </ElCol>
         </ElSkeleton>
       </ElCard>
+    </ElCol>
+  </ElRow>
 
-      <ElCard shadow="never" class="mt-20px">
+  <ElRow class="mt-20px" :gutter="20" justify="space-between">
+    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-20px">
+      <!-- 收入和支出趋势图 -->
+      <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <span>xx{{ t('workplace.index') }}</span>
+          <span>收入{{ t('workplace.index') }}</span>
         </template>
-        <ElSkeleton :loading="loading" animated>
-          <Echart :options="radarOptionData" :height="400" />
+        <ElSkeleton :loading="loading" animated :rows="4">
+          <Echart :options="incMonthLineData" :height="350" />
         </ElSkeleton>
       </ElCard>
+    </ElCol>
 
-      <ElCard shadow="never" class="mt-20px">
+    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-20px">
+      <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <span>{{ t('workplace.team') }}</span>
+          <span>支出{{ t('workplace.index') }}</span>
         </template>
-        <ElSkeleton :loading="loading" animated>
-          <ElRow>
-            <ElCol v-for="item in team" :key="`team-${item.name}`" :span="12" class="mb-20px">
-              <div class="flex items-center">
-                <Icon :icon="item.icon" class="mr-10px" />
-                <ElLink type="default" :underline="false">
-                  {{ item.name }}
-                </ElLink>
-              </div>
-            </ElCol>
-          </ElRow>
+        <ElSkeleton :loading="loading" animated :rows="4">
+          <Echart :options="expMonthLineData" :height="350" />
         </ElSkeleton>
       </ElCard>
     </ElCol>

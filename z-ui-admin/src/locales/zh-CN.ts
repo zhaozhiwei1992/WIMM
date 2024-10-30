@@ -208,7 +208,10 @@ export default {
     dynamic: '动态',
     push: '推送',
     pushCode: 'Archer 推送 代码到 Github',
-    follow: '关注'
+    follow: '关注',
+    totalAssets: '总资产',
+    totalLiabilities: '总负债',
+    netWorth: '净资产'
   },
   formDemo: {
     input: '输入框',

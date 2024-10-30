@@ -1,12 +1,12 @@
 import request from '@/config/axios'
-import type { Dynamic, Project, RadarData, Team, WorkplaceTotal } from './types'
+import type { Dynamic, Asset, RadarData, Team, WorkplaceTotal } from './types'
 
 export const getCountApi = (): Promise<IResponse<WorkplaceTotal>> => {
   return request.get({ url: '/system/workplace/total' })
 }
 
-export const getProjectApi = (): Promise<IResponse<Project>> => {
-  return request.get({ url: '/system/workplace/project' })
+export const getAssetsApi = (): Promise<Asset> => {
+  return request.get({ url: '/acct/workplace/assets' })
 }
 
 export const getDynamicApi = (): Promise<IResponse<Dynamic[]>> => {

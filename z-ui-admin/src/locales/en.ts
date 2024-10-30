@@ -207,7 +207,10 @@ export default {
     dynamic: 'Dynamic',
     push: 'push',
     pushCode: 'Archer push code to Github',
-    follow: 'Follow'
+    follow: 'Follow',
+    totalAssets: 'total assets',
+    totalLiabilities: 'total liabilities',
+    netWorth: 'net worth'
   },
   formDemo: {
     input: 'Input',
