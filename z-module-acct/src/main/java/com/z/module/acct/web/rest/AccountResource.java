@@ -1,33 +1,45 @@
 package com.z.module.acct.web.rest;
 
+import com.z.module.acct.domain.AccountCls;
 import com.z.module.acct.domain.VoucherDetail;
+import com.z.module.acct.repository.AccountClsRepository;
 import com.z.module.acct.repository.VoucherDetailRepository;
 import com.z.module.acct.web.vo.AccountVO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/acct")
 public class AccountResource {
 
     private final VoucherDetailRepository voucherDetailRepository;
+    private final AccountClsRepository accountClsRepository;
 
-    public AccountResource(VoucherDetailRepository voucherDetailRepository) {
+    public AccountResource(VoucherDetailRepository voucherDetailRepository, AccountClsRepository accountClsRepository) {
         this.voucherDetailRepository = voucherDetailRepository;
+        this.accountClsRepository = accountClsRepository;
     }
 
     @Operation(description = "记账")
     @PostMapping("/account")
     @Transactional
-    public String acct(AccountVO accountVO){
+    public String acct(@RequestBody AccountVO accountVO){
 
         long count = voucherDetailRepository.count();
-        String voucherNo = String.format("%15d", count);
+        String voucherNo = String.format("%010d", count/2);
+
+        List<AccountCls> accountClsList = accountClsRepository.findAllByCodeIn(Arrays.asList(accountVO.getCreditAccount(), accountVO.getDebitAccount()));
+        Map<String, String> map = accountClsList.stream().collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));
 
         ArrayList<VoucherDetail> voucherDetails = new ArrayList<>();
 
@@ -35,6 +47,7 @@ public class AccountResource {
         {
             VoucherDetail voucherDetail = new VoucherDetail();
             voucherDetail.setAcctClsCode(accountVO.getCreditAccount());
+            voucherDetail.setAcctClsName(map.get(accountVO.getCreditAccount()));
             voucherDetail.setAmt(accountVO.getAmt());
             voucherDetail.setRemark(accountVO.getRemark());
             voucherDetail.setDrCr(-1);
@@ -44,6 +57,7 @@ public class AccountResource {
         {
             VoucherDetail voucherDetail = new VoucherDetail();
             voucherDetail.setAcctClsCode(accountVO.getDebitAccount());
+            voucherDetail.setAcctClsName(map.get(accountVO.getDebitAccount()));
             voucherDetail.setAmt(accountVO.getAmt());
             voucherDetail.setRemark(accountVO.getRemark());
             voucherDetail.setDrCr(1);

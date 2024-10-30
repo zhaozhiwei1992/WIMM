@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AccountClsSelectMapper {
 
-    @Mapping(source = "id", target = "value")
+    @Mapping(source = "code", target = "value")
     @Mapping(source = "name", target = "label")
     SelectOptionVO convert(AccountCls bean);
 

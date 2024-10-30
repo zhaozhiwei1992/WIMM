@@ -1,7 +1,7 @@
 <script name="MenuIndex" setup lang="ts">
 import { ContentWrap } from '@/components/ContentWrap'
 import { useI18n } from '@/hooks/web/useI18n'
-import { ElButton, ElForm, ElCascader, ElInput, ElFormItem } from 'element-plus'
+import { ElButton, ElForm, ElCascader, ElInput, ElFormItem, ElMessage } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 import { AccountVO } from '@/api/acct/account/types'
 import { saveApi } from '@/api/acct/account'
@@ -29,6 +29,7 @@ const form = reactive<AccountVO>({
 
 const rules = reactive<FormRules<AccountVO>>({
   debitAccount: [{ required: true, message: t('rules.required'), trigger: 'blur' }],
+  creditAccount: [{ required: true, message: t('rules.required'), trigger: 'blur' }],
   amt: [{ required: true, message: t('rules.required'), trigger: 'blur' }]
 })
 
@@ -53,6 +54,7 @@ const save = async () => {
         loading.value = true
         const res = await saveApi(form)
         if (res) {
+          ElMessage.success('保存成功')
           // 清空表单
           resetForm()
         }
@@ -82,15 +84,28 @@ onMounted(async () => {
   <ContentWrap>
     <ElForm
       ref="elFormRefExp"
-      :model="form.debitAccount"
+      :model="form"
+      :rules="rules"
       label-width="auto"
       style="max-width: 600px"
     >
       <ElFormItem label="贷">
-        <ElCascader placeholder="支出" :options="acctClsOptions" filterable />
+        <ElCascader
+          placeholder="支出"
+          v-model="form.debitAccount"
+          :options="acctClsOptions"
+          :props="{ emitPath: false }"
+          filterable
+        />
       </ElFormItem>
       <ElFormItem label="借">
-        <ElCascader placeholder="收入" :options="acctClsOptions" filterable />
+        <ElCascader
+          placeholder="收入"
+          v-model="form.creditAccount"
+          :options="acctClsOptions"
+          :props="{ emitPath: false }"
+          filterable
+        />
       </ElFormItem>
       <ElFormItem label="金额">
         <ElInput v-model="form.amt" style="width: 240px" placeholder="支出金额，支持运算符" />

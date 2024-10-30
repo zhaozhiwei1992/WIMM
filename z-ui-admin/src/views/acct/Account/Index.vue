@@ -2,15 +2,15 @@
 import { ContentWrap } from '@/components/ContentWrap'
 import { Search } from '@/components/Search'
 import { useI18n } from '@/hooks/web/useI18n'
-import { ElButton } from 'element-plus'
+import { ElButton, ElTag } from 'element-plus'
 import { Table } from '@/components/Table'
 import { getTableListApi, delTableListApi } from '@/api/acct/account'
 import { useTable } from '@/hooks/web/useTable'
-import { AccountVO } from '@/api/acct/account/types'
-import { ref, reactive } from 'vue'
+import { AccountVO, VoucherDetailVO } from '@/api/acct/account/types'
+import { ref, reactive, h } from 'vue'
 import { CrudSchema, useCrudSchemas } from '@/hooks/web/useCrudSchemas'
 
-const { register, tableObject, methods } = useTable<AccountVO>({
+const { register, tableObject, methods } = useTable<VoucherDetailVO>({
   getListApi: getTableListApi,
   delListApi: delTableListApi,
   response: {
@@ -55,8 +55,15 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    field: 'creditAccount',
-    label: '贷方科目',
+    field: 'voucherNo',
+    label: '凭证号',
+    form: {
+      show: false
+    }
+  },
+  {
+    field: 'acctClsCode',
+    label: '科目编码',
     form: {
       formItemProps: {
         required: true
@@ -64,12 +71,21 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    field: 'debitAccount',
-    label: '借方科目',
-    form: {
-      formItemProps: {
-        required: true
-      }
+    field: 'acctClsName',
+    label: '科目名称'
+  },
+  {
+    field: 'drCr',
+    label: '借贷方向',
+    formatter: (_: Recordable, __: VoucherDetailVO, cellValue: number) => {
+      let leaf = cellValue === 1 ? '借' : '贷'
+      return h(
+        ElTag,
+        {
+          type: cellValue === 1 ? 'success' : 'danger'
+        },
+        () => leaf
+      )
     }
   },
   {

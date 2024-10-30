@@ -69,7 +69,7 @@ public class VoucherDetailResource {
         //创建实例
         Example<VoucherDetail> ex = Example.of(voucherDetail, matcher);
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo");
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo", "drCr");
         // 分页
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize(), sort);
         Page<VoucherDetail> all = voucherDetailRepository.findAll(ex, pageable);
