@@ -1,5 +1,6 @@
 package com.z.framework.common.domain;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -7,7 +8,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 @EntityListeners(AuditingEntityListener.class) // 使用审计必须有这个注解
 public abstract class AbstractAuditingEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @CreatedBy
@@ -47,4 +50,16 @@ public abstract class AbstractAuditingEntity implements Serializable {
     @LastModifiedDate
     @Column(name = "last_modified_date")
     private Instant lastModifiedDate = Instant.now().plusMillis(TimeUnit.HOURS.toMillis(8));
+
+    // 租户id, 家庭户号
+    @NotNull
+    @Column(unique = true, nullable = false)
+    private String tenantId;
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        this.tenantId = TenantContext.getTenantId();
+    }
+
 }

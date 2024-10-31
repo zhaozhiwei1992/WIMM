@@ -1,22 +1,21 @@
 import request from '@/config/axios'
-import type { Dynamic, Asset, RadarData, Team, WorkplaceTotal } from './types'
+import type { AssetVO, PieDataVO, LineDataVO } from './types'
 
-export const getCountApi = (): Promise<IResponse<WorkplaceTotal>> => {
-  return request.get({ url: '/system/workplace/total' })
+export const getAssetsApi = (): Promise<AssetVO> => {
+  return request.get({ url: '/acct/workplace/asset' })
 }
 
-export const getAssetsApi = (): Promise<Asset> => {
-  return request.get({ url: '/acct/workplace/assets' })
+// 按月获取收入支出数据
+export const getMonthlyIncExpDataApi = (): Promise<LineDataVO[]> => {
+  return request.get({ url: '/acct/workplace/monthlyIncExpData' })
 }
 
-export const getDynamicApi = (): Promise<IResponse<Dynamic[]>> => {
-  return request.get({ url: '/system/workplace/dynamic' })
+// 获取支出类别饼图
+export const getExpPieDataApi = (): Promise<PieDataVO[]> => {
+  return request.get({ url: '/acct/workplace/expPieData' })
 }
 
-export const getTeamApi = (): Promise<IResponse<Team[]>> => {
-  return request.get({ url: '/system/workplace/team' })
-}
-
-export const getRadarApi = (): Promise<IResponse<RadarData[]>> => {
-  return request.get({ url: '/system/workplace/radar' })
+// 获取收入类别饼图
+export const getIncPieDataApi = (): Promise<PieDataVO[]> => {
+  return request.get({ url: '/acct/workplace/incPieData' })
 }

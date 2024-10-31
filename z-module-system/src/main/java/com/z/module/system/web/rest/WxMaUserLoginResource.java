@@ -79,7 +79,7 @@ public class WxMaUserLoginResource {
 			WxMaJscode2SessionResult session = wxMaService.getUserService().getSessionInfo(code);
 			String openid = session.getOpenid();
 			final User user = oneByPhoneNumber.get();
-			String token = tokenProviderService.generateToken(user.getLogin(), false);
+			String token = tokenProviderService.generateToken(user.getLogin(), false, user.getTenantId());
 			//记录openid和login的关联
 			loginService.saveOpenidUserLogin(openid, user.getLogin());
 			map.put("mobile", phoneNumber);
@@ -129,7 +129,7 @@ public class WxMaUserLoginResource {
 			}else{
 				throw new RuntimeException("没有关联手机号");
 			}
-			final String token = tokenProviderService.generateToken(login, false);
+			final String token = tokenProviderService.generateToken(login, false, oneByLogin.get().getTenantId());
 			map.put("openid", openid);
 			map.put("token", token);
 			return map;

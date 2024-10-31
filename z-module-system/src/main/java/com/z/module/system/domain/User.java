@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,13 +28,13 @@ import java.util.Set;
 @EntityListeners(UserListener.class)
 public class User extends AbstractAuditingEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
 
     @NotNull
     @Pattern(regexp = Constants.LOGIN_REGEX)
@@ -62,4 +63,5 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @Column(name = "phone_number", length = 11)
     private String phoneNumber;
+
 }

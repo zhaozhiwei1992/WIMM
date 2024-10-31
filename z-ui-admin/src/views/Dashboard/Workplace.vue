@@ -10,6 +10,12 @@ import { lineOptions, pieOptions } from './echarts-data'
 import { getAssetsApi } from '@/api/dashboard/workplace'
 import { set } from 'lodash-es'
 import { useCache } from '@/hooks/web/useCache'
+import {
+  getIncPieDataApi,
+  getExpPieDataApi,
+  getMonthlyIncExpDataApi
+} from '@/api/dashboard/workplace'
+import { cloneDeep } from 'lodash-es'
 
 const loading = ref(true)
 
@@ -20,14 +26,14 @@ let totalLiabilities = ref(0)
 //净资产：Net Worth
 let netWorth = ref(0)
 const getAsset = async () => {
-  const res = await getAssetsApi().catch(() => { })
+  const res = await getAssetsApi().catch(() => {})
   totalAssets.value = res?.totalAssets || 0
   totalLiabilities.value = res?.totalLiabilities || 0
   netWorth.value = res?.netWorth || 0
 }
 
 // 收入支出类别统计
-let incPieData = reactive<EChartsOption>(pieOptions) as EChartsOption
+let incPieData = reactive<EChartsOption>(cloneDeep(pieOptions)) as EChartsOption
 
 // 收入饼图
 const getIncPieData = async () => {
@@ -38,6 +44,7 @@ const getIncPieData = async () => {
       'legend.data',
       res.map((v) => t(v.name))
     )
+    incPieData!.title!.text = '收入统计图'
     incPieData!.series![0].data = res.map((v) => {
       return {
         name: t(v.name),
@@ -47,16 +54,17 @@ const getIncPieData = async () => {
   }
 }
 
-let expPieData = reactive<EChartsOption>(pieOptions) as EChartsOption
+let expPieData = reactive<EChartsOption>(cloneDeep(pieOptions)) as EChartsOption
 const getExpPieData = async () => {
   const res = await getExpPieDataApi().catch(() => {})
   if (res) {
     set(
-      incPieData,
+      expPieData,
       'legend.data',
       res.map((v) => t(v.name))
     )
-    incPieData!.series![0].data = res.map((v) => {
+    expPieData!.title!.text = '支出统计图'
+    expPieData!.series![0].data = res.map((v) => {
       return {
         name: t(v.name),
         value: v.value
@@ -77,21 +85,22 @@ const getMonthlyIncExpData = async () => {
       'xAxis.data',
       res.map((v) => t(v.name))
     )
+    set(incExpMonthLineData, 'title.text', '收入支出趋势统计(月)')
     set(incExpMonthLineData, 'series', [
       {
-        name: t('analysis.estimate'),
+        name: t('workspace.inc'),
         smooth: true,
         type: 'line',
-        data: res.map((v) => v.estimate),
+        data: res.map((v) => v.line1),
         animationDuration: 2800,
         animationEasing: 'cubicInOut'
       },
       {
-        name: t('analysis.actual'),
+        name: t('workspace.exp'),
         smooth: true,
         type: 'line',
         itemStyle: {},
-        data: res.map((v) => v.actual),
+        data: res.map((v) => v.line2),
         animationDuration: 2800,
         animationEasing: 'quadraticOut'
       }
@@ -153,7 +162,9 @@ onMounted(() => {
               </div>
               <ElDivider direction="vertical" />
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.totalLabilities') }}</div>
+                <div class="text-14px text-gray-400 mb-20px">{{
+                  t('workplace.totalLabilities')
+                }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -178,7 +189,7 @@ onMounted(() => {
       <!-- 收入分布饼图 -->
       <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <span>收入{{ t('workplace.index') }}</span>
+          <span>收入统计</span>
         </template>
         <ElSkeleton :loading="loading" animated :rows="4">
           <Echart :options="incPieData" :height="350" />
@@ -189,7 +200,7 @@ onMounted(() => {
       <!-- 支出分布饼图 -->
       <ElCard shadow="hover" class="mb-20px">
         <template #header>
-          <span>支出{{ t('workplace.index') }}</span>
+          <span>支出统计</span>
         </template>
         <ElSkeleton :loading="loading" animated :rows="4">
           <Echart :options="expPieData" :height="350" />
@@ -203,18 +214,9 @@ onMounted(() => {
         </template>
         <!-- 快捷操作 快速记账、报表查看 -->
         <ElSkeleton :loading="loading" animated>
-          <ElCol
-            v-for="item in 5"
-            :key="`card-${item}`"
-            :xl="12"
-            :lg="12"
-            :md="12"
-            :sm="24"
-            :xs="24"
-            class="mb-10px"
-          >
+          <ElCol :xl="12" :lg="12" :md="12" :sm="24" :xs="24" class="mb-10px">
             <ElLink type="default" :underline="false">
-              {{ t('workplace.operation') }}{{ item }}
+              <!-- 记账 -->
             </ElLink>
           </ElCol>
         </ElSkeleton>
@@ -223,25 +225,14 @@ onMounted(() => {
   </ElRow>
 
   <ElRow class="mt-20px" :gutter="20" justify="space-between">
-    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-20px">
+    <ElCol :xl="24" :lg="24" :md="24" :sm="24" :xs="24" class="mb-20px">
       <!-- 收入和支出趋势图 -->
       <ElCard shadow="hover" class="mb-20px">
         <template #header>
           <span>收入{{ t('workplace.index') }}</span>
         </template>
         <ElSkeleton :loading="loading" animated :rows="4">
-          <Echart :options="incMonthLineData" :height="350" />
-        </ElSkeleton>
-      </ElCard>
-    </ElCol>
-
-    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-20px">
-      <ElCard shadow="hover" class="mb-20px">
-        <template #header>
-          <span>支出{{ t('workplace.index') }}</span>
-        </template>
-        <ElSkeleton :loading="loading" animated :rows="4">
-          <Echart :options="expMonthLineData" :height="350" />
+          <Echart :options="incExpMonthLineData" :height="350" />
         </ElSkeleton>
       </ElCard>
     </ElCol>

@@ -210,8 +210,10 @@ export default {
     pushCode: 'Archer 推送 代码到 Github',
     follow: '关注',
     totalAssets: '总资产',
-    totalLiabilities: '总负债',
-    netWorth: '净资产'
+    totalLabilities: '总负债',
+    netWorth: '净资产',
+    inc: '收入',
+    exp: '支出'
   },
   formDemo: {
     input: '输入框',

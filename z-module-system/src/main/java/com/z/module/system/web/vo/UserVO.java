@@ -56,4 +56,7 @@ public class UserVO implements Serializable {
     private String phoneNumber;
 
     private Long avatar;
+
+    // 户号，可自定义，也可以动态生成
+    private String tenantId;
 }

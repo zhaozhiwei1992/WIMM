@@ -78,7 +78,7 @@ public class MobileLoginResource {
             String dbPassWord = dbUser.getPassword();
             logger.info("数据库密码: {}", dbPassWord);
             if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
-                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe());
+                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe(), dbUser.getTenantId());
                 authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
                 authedRespVO.setToken(token);
 
@@ -128,7 +128,7 @@ public class MobileLoginResource {
             String dbPassWord = dbUser.getPassword();
             logger.info("数据库密码: {}", dbPassWord);
             if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
-                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe());
+                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe(), dbUser.getTenantId());
                 authedRespVO.setPermissions(Arrays.asList("*.*.*"));
                 authedRespVO.setToken(token);
 

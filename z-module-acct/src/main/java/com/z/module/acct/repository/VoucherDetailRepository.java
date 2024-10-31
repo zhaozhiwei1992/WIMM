@@ -11,4 +11,6 @@ public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Lo
     void deleteAllByIdIn(List<Long> idList);
 
     void deleteAllByVoucherNoIn(List<String> list);
+
+    List<VoucherDetail> findAllByAcctClsCodeIn(List<String> list);
 }

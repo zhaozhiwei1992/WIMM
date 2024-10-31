@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Calendar;
@@ -64,15 +65,16 @@ public class TokenProviderService {
     }
 
     /**
+     * @param userName   :
+     * @param rememberMe :
+     * @param tenantId: 租户id
      * @data: 2023/5/20-下午6:40
      * @User: zhaozhiwei
      * @method: createToken
-      * @param userName :
- * @param rememberMe :
      * @return: java.lang.String
      * @Description: 生成token
      */
-    public String generateToken(String userName, boolean rememberMe) {
+    public String generateToken(String userName, boolean rememberMe, @NotNull String tenantId) {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
         // 设置签发时间
@@ -88,6 +90,7 @@ public class TokenProviderService {
         HashMap<String, Object> map = new HashMap<>();
         //you can put any data in the map
         map.put("userName", userName);
+        map.put("tenantId", tenantId);
 
         String jwt = Jwts.builder()
                 .setClaims(map)
@@ -102,23 +105,22 @@ public class TokenProviderService {
     }
 
     /**
+     * @param authToken :
      * @data: 2023/5/20-下午9:56
      * @User: zhaozhiwei
      * @method: validateToken
-      * @param authToken :
      * @return: java.lang.String
      * @Description: 校验没有异常返回用户名
      */
-    public String validateToken(String authToken) {
+    public Map<String, Object> validateToken(String authToken) {
 
         if(!StringUtils.hasText(authToken)){
             throw new RuntimeException("认证失败");
         }
 
-        Map<String, Object> body =
-                // 去掉前缀解析, 或者token传入前就处理掉
-                jwtParser.parseClaimsJws(authToken.replace(TOKEN_PREFIX, ""))
-                        .getBody();
-        return body.get("userName").toString();
+        // 去掉前缀解析, 或者token传入前就处理掉
+        //        return body.get("userName");
+        return jwtParser.parseClaimsJws(authToken.replace(TOKEN_PREFIX, ""))
+                .getBody();
     }
 }

@@ -90,6 +90,11 @@ public final class SecurityUtils {
         return (String)getAuthenticationDetails().get("token");
     }
 
+    // 获取租户id
+    public static String getTenantId(){
+        return (String)getAuthenticationDetails().get("tenantId");
+    }
+
     /**
      * 取得当前用户的ID
      * @return

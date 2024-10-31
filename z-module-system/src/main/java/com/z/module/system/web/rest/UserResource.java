@@ -1,6 +1,8 @@
 package com.z.module.system.web.rest;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.z.framework.common.repository.CommonSqlRepository;
 import com.z.framework.security.util.SecurityUtils;
 import com.z.module.system.domain.User;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
@@ -109,6 +112,12 @@ public class UserResource {
 
         final User user = new User();
         BeanUtil.copyProperties(userVO, user);
+
+        if(!StringUtils.hasText(user.getTenantId())){
+            // 日期时间+随机数生成户号
+            // 网络版本根据工单，创建用户，并生成户号
+            user.setTenantId(DateUtil.format(new Date(), "yyyyMMddHHmmss") + RandomUtil.randomNumbers(4));
+        }
 
         User newUser = userRepository.save(user);
 

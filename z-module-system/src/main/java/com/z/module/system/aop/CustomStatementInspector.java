@@ -3,25 +3,26 @@ package com.z.module.system.aop;
 import cn.hutool.core.util.StrUtil;
 import com.z.framework.security.util.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.Values;
 import org.hibernate.resource.jdbc.spi.StatementInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.Objects;
 
@@ -51,8 +52,8 @@ public class CustomStatementInspector implements StatementInspector {
     public String inspect(String sql) {
         try {
             // 1. 是否登录状态, 未登录不允许查看数据
-            final boolean authenticated = SecurityUtils.isAuthenticated();
-            if (!authenticated) {
+            String currentLoginName = SecurityUtils.getCurrentLoginName();
+            if (currentLoginName.equals("anonymousUser")) {
                 // 可以显示未登录不允许查看任何数据 1<>1
                 log.info("当前未登录, 看着办吧");
                 return sql;
@@ -63,7 +64,7 @@ public class CustomStatementInspector implements StatementInspector {
             Statements statements = CCJSqlParserUtil.parseStatements(sql);
             StringBuilder sqlStringBuilder = new StringBuilder();
             int i = 0;
-            for (Statement statement : statements.getStatements()) {
+            for (Statement statement : statements) {
                 if (null != statement) {
                     if (i++ > 0) {
                         sqlStringBuilder.append(';');
@@ -82,30 +83,54 @@ public class CustomStatementInspector implements StatementInspector {
 
     private String doSqlParser(Statement statement) {
         if (statement instanceof Select) {
-            this.doSelectParser(((Select) statement).getSelectBody());
-        }else if (statement instanceof Delete){
+            this.doSelectParser(((Select) statement).getPlainSelect());
+        } else if (statement instanceof Delete) {
             this.doDeleteParser((Delete) statement);
+        } else if (statement instanceof Insert) {
+//            this.doInsertParser((Insert) statement);
         }
         return statement.toString();
     }
 
+    private void doInsertParser(Insert insert) {
+
+        // 租户处理, 删除字段直接写入值
+        String tenantId = SecurityUtils.getTenantId();
+
+        ExpressionList<Column> columns = insert.getColumns();
+        ExpressionList<Expression> values = (ExpressionList<Expression>) insert.getValues().getExpressions();
+        // 获取tenantId的下标
+        int index = -1;
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            if("tenant_id".equals(column.getColumnName())){
+                index = i;
+            }
+        }
+        columns.remove(index);
+        values.remove(index);
+
+        columns.add(new Column("tenant_id"));
+        values.add(new StringValue("99"));
+
+        System.out.println(insert.toString());
+    }
+
     /**
+     * @param delete :
      * @Description: 删除时做一些操作，控制误删除
      * @author: zhaozhiwei
      * @data: 2024/10/13-16:10
-     * @param delete :
      * @return: void
-    */
+     */
 
     private void doDeleteParser(Delete delete) {
         // 如何根据id判断数据是否能删除
         System.out.println("delete");
     }
 
-    public void doSelectParser(SelectBody selectBody) {
-        if (selectBody instanceof PlainSelect) {
-            processPlainSelect((PlainSelect) selectBody);
-        }
+    public void doSelectParser(PlainSelect selectBody) {
+        processPlainSelect(selectBody);
     }
 
     /**
@@ -114,8 +139,7 @@ public class CustomStatementInspector implements StatementInspector {
      * @User: zhaozhiwei
      * @method: processPlainSelect
      * @return: void
-     * @Description:
-     * 在这里扩展各种的条件
+     * @Description: 在这里扩展各种的条件
      * 1. 数据权限扩展
      * 2. 动态表替换, 支持相同domain,不同表结构
      */
@@ -126,6 +150,12 @@ public class CustomStatementInspector implements StatementInspector {
 
             // 换表
             this.replaceTable(fromTable);
+
+            // 多租户，增加tenantId过滤
+            String currentLoginName = SecurityUtils.getCurrentLoginName();
+            if (!"admin".equals(currentLoginName)) {
+                //
+            }
 
             //TODO  这里可扩展
         }
@@ -147,32 +177,6 @@ public class CustomStatementInspector implements StatementInspector {
                     log.info("表替换,将 {} 替换为 {}", oldName, newName);
                 }
             }
-        }
-    }
-
-    /**
-     * @param currentExpression :
-     * @param appendExpression  :
-     * @data: 2022/5/14-下午10:40
-     * @User: zhaozhiwei
-     * @method: builderExpression
-     * @return: net.sf.jsqlparser.expression.Expression
-     * @Description: 描述
-     * 根据规则，　添加权限条件
-     */
-    protected Expression joinExpression(Expression currentExpression, Expression appendExpression) {
-        final StringValue stringValue = new StringValue("1");
-        final EqualsTo allCondition = new EqualsTo(stringValue, stringValue);
-
-        if (currentExpression == null) {
-            //            之前如果是全部查询(没有条件), 则返回1=1
-            currentExpression = allCondition;
-        }
-
-        if (currentExpression instanceof OrExpression) {
-            return new AndExpression(new Parenthesis(currentExpression), appendExpression);
-        } else {
-            return new AndExpression(currentExpression, appendExpression);
         }
     }
 }

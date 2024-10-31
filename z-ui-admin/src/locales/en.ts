@@ -210,7 +210,9 @@ export default {
     follow: 'Follow',
     totalAssets: 'total assets',
     totalLiabilities: 'total liabilities',
-    netWorth: 'net worth'
+    netWorth: 'net worth',
+    inc: 'income',
+    exp: 'expect'
   },
   formDemo: {
     input: 'Input',

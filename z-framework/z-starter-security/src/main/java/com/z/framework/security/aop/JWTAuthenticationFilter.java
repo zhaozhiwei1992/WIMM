@@ -1,6 +1,7 @@
 package com.z.framework.security.aop;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.z.framework.common.domain.TenantContext;
 import com.z.framework.security.config.SpringSecurityAutoConfiguration;
 import com.z.framework.security.service.TokenProviderService;
 import com.z.framework.security.util.SecurityUtils;
@@ -200,10 +201,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (token != null) {
-            String userName;
 
             // 解密Token
-            userName = tokenProviderService.validateToken(token);
+            Map<String, Object> m = tokenProviderService.validateToken(token);
+            String userName = m.get("userName").toString();
             if (StringUtils.isNotBlank(userName)) {
 
                 // 获取数据库用户, 进行数据库用户二次校验, 根据用户状态控制是否允许登录
@@ -227,6 +228,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
                     extensionMap.put("tokenid", token);
                     extensionMap.put("year", LocalDateTime.now().getYear());
+                    extensionMap.put("tenantId", m.get("tenantId").toString());
+                    TenantContext.setTenantId(String.valueOf(extensionMap.get("tenantId")));
 
                     // 可以这里添加其它必要信息
                     authenticationToken.setDetails(extensionMap);

@@ -1,13 +1,14 @@
 package com.z.framework.operatelog.aop;
 
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.z.framework.operatelog.domain.RequestLog;
 import com.z.framework.operatelog.repository.RequestLogRepository;
 import com.z.framework.operatelog.service.UrlMappingService;
 import com.z.framework.security.util.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 
 /**
@@ -78,7 +77,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 urlMappingService = SpringUtil.getBean(UrlMappingService.class);
             }
 
-            if(requestURI.startsWith("/api")){
+            if(requestURI.startsWith("/api") && !loginName.equals("anonymousUser")){
                 String s = urlMappingService.getUrlMap().get(requestURI + "_" + method);
                 requestLogging.setRequestName(s);
                 final Map<String, Object> parameterMap = this.getParameterMap(request);

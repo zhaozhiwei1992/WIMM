@@ -1,8 +1,12 @@
 package com.z.module.system.web.rest;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.google.code.kaptcha.Constants;
+import com.z.framework.common.domain.TenantContext;
 import com.z.framework.security.service.TokenProviderService;
+import com.z.framework.security.util.SecurityUtils;
 import com.z.module.system.domain.Upload;
 import com.z.module.system.domain.User;
 import com.z.module.system.domain.UserAuthority;
@@ -24,6 +28,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,7 +115,7 @@ public class LoginResource {
             String dbPassWord = dbUser.getPassword();
             logger.info("数据库密码: {}", dbPassWord);
             if (passwordEncoder.matches(password, dbPassWord)) {
-                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe());
+                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe(), dbUser.getTenantId());
                 // 如果不需要前台动态控制按钮显示,可以返回***
                 // authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
                 // 根据按钮权限动态控制前端按钮展现
@@ -129,11 +134,14 @@ public class LoginResource {
                     authedRespVO.setAvatar(base64Image);
                 }
 
+                // 设置租户id
+                authedRespVO.setTenantId(dbUser.getTenantId());
+
                 // 记录token白名单, 注: 如果cache使用 redis之类的, 可以跟token同步增加失效时间
                 loginService.addTokenWriteList(token);
 
                 // 登录成功记录日志
-                loginLogService.save(loginVM, request);
+//                loginLogService.save(loginVM, request);
                 return authedRespVO;
             }else{
                 log.error(String.format("登录失败, 用户: %s, 密码: %s, 数据库密码: %s", username, password, dbPassWord));
@@ -151,6 +159,7 @@ public class LoginResource {
 
         // 删除当前token
         loginService.removeTokenWriteList();
+        TenantContext.clear();
 
         return "success";
     }

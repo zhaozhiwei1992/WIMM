@@ -38,4 +38,5 @@ public class AuthedRespVO {
     private List<String> permissions;
     private String token;
     private String avatar;
+    private String tenantId;
 }
