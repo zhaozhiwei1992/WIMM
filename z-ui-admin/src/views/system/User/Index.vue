@@ -65,6 +65,13 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
+    field: 'tenantId',
+    label: '租户',
+    search: {
+      show: true
+    }
+  },
+  {
     field: 'name',
     label: '中文名',
     search: {

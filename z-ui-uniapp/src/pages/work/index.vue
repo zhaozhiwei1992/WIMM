@@ -45,39 +45,15 @@ import { ref, reactive, onMounted } from "vue";
 const dynamicGrid = reactive([
   {
     type: "person-filled",
-    text: "用户管理",
+    text: "记个账",
   },
   {
     type: "staff-filled",
-    text: "角色管理",
+    text: "科目维护",
   },
   {
     type: "color",
-    text: "菜单管理",
-  },
-  {
-    type: "settings-filled",
-    text: "部门管理",
-  },
-  {
-    type: "heart-filled",
-    text: "岗位管理",
-  },
-  {
-    type: "bars",
-    text: "字典管理",
-  },
-  {
-    type: "gear-filled",
-    text: "参数设置",
-  },
-  {
-    type: "chat-filled",
-    text: "通知公告",
-  },
-  {
-    type: "wallet-filled",
-    text: "日志管理",
+    text: "记账明细",
   },
 ]);
 

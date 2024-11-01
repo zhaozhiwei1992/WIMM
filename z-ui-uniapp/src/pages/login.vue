@@ -45,8 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, readonly, ref } from "vue";
-import type { UserType } from "@/api/login/types";
+import { onMounted, reactive, ref } from "vue";
 import { loginApi, loginByPhoneApi, loginByWxApi } from "@/api/login";
 
 const loginForm = ref<any>(null);
@@ -133,5 +132,8 @@ const onClickItem = (e: any) => {
   }
 };
 
-onMounted(() => {});
+onMounted(() => {
+  // 如果是单机版直接跳转首页
+  uni.switchTab({ url: "/pages/index/index" });
+});
 </script>
