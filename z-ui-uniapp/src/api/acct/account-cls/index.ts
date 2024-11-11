@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import { ComponentOptions } from '../common-types'
+import type { ComponentOptions } from '../common-types'
 import type { AccountClsVO } from './types'
 
 export const getTableListApi = (params: any): Promise<IResponse> => {
