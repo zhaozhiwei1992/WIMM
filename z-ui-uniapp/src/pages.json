@@ -35,6 +35,12 @@
 			}
 		},
 		{
+			"path": "pages/report/CreditAnalyze",
+			"style": {
+				"navigationBarTitleText": "收入分析"
+			}
+		},
+		{
 			"path": "pages/mine/index",
 			"style": {
 				"navigationBarTitleText": "我的"

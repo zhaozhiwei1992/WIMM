@@ -49,7 +49,11 @@ const dynamicGrid = reactive([
   },
   {
     type: "color",
-    text: "记账明细",
+    text: "记账导出",
+  },
+  {
+    type: "color",
+    text: "记账导入",
   },
   {
     type: "staff-filled",
@@ -77,7 +81,6 @@ function changeSwiper(e: any) {
 }
 
 function changeGrid(obj) {
-  console.log('点击了第x个', obj)
   const i = obj.detail.index
   console.log(i)
   if (i === 0) {
@@ -86,6 +89,8 @@ function changeGrid(obj) {
 
   } else if (i === 2) {
 
+  } else if (i === 3) {
+    uni.navigateTo({ url: "/pages/report/CreditAnalyze" });
   }
   // uni.showToast({
   //   title: "模块建设中~",
