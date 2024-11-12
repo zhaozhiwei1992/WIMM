@@ -17,13 +17,13 @@
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/login/login",
 			"style": {
-				"navigationBarTitleText": "首页"
+				"navigationBarTitleText": "登录"
 			}
 		},
 		{
-			"path": "pages/login",
+			"path": "pages/login/register",
 			"style": {
 				"navigationBarTitleText": "登录"
 			}
@@ -66,10 +66,10 @@
 		"backgroundColor": "#ffffff",
 		"list": [
 			{
-				"pagePath": "pages/index/index",
+				"pagePath": "pages/acct/AddAccount",
 				"iconPath": "static/images/tabbar/home.png",
 				"selectedIconPath": "static/images/tabbar/home_.png",
-				"text": "首页"
+				"text": "记账"
 			},
 			{
 				"pagePath": "pages/work/index",

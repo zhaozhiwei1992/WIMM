@@ -21,7 +21,7 @@
     </uni-swiper-dot>
 
     <!-- 宫格组件 -->
-    <uni-section title="系统管理" type="line"></uni-section>
+    <uni-section title="工作空间" type="line"></uni-section>
     <view class="grid-body">
       <uni-grid :column="4" :showBorder="false" @change="changeGrid">
         <uni-grid-item
@@ -48,12 +48,16 @@ const dynamicGrid = reactive([
     text: "记个账",
   },
   {
-    type: "staff-filled",
-    text: "科目维护",
-  },
-  {
     type: "color",
     text: "记账明细",
+  },
+  {
+    type: "staff-filled",
+    text: "收入分析",
+  },
+  {
+    type: "staff-filled",
+    text: "支出分析",
   },
 ]);
 
@@ -72,12 +76,22 @@ function changeSwiper(e: any) {
   current.value = e.detail.current;
 }
 
-function changeGrid() {
-  uni.showToast({
-    title: "模块建设中~",
-    image: "https://cdn.uviewui.com/uview/demo/toast/error.png",
-    duration: 2000,
-  });
+function changeGrid(obj) {
+  console.log('点击了第x个', obj)
+  const i = obj.detail.index
+  console.log(i)
+  if (i === 0) {
+    uni.switchTab({ url: "/pages/acct/AddAccount" });
+  } else if (i === 1) {
+
+  } else if (i === 2) {
+
+  }
+  // uni.showToast({
+  //   title: "模块建设中~",
+  //   image: "https://cdn.uviewui.com/uview/demo/toast/error.png",
+  //   duration: 2000,
+  // });
 }
 
 // 如果需要在组件挂载后执行某些操作，可以使用 onMounted 钩子

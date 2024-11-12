@@ -3,7 +3,9 @@ export type AccountVO = {
   createdBy: string
   createdDate: Date
   creditAccount: string
+  creditAccountName: string
   debitAccount: string
+  debitAccountName: string
   amt: number
   remkark: string
   type: number
