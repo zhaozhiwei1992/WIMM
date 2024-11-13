@@ -1,115 +1,104 @@
 <template>
-    <!-- 估计是这里表单有问题，参考plus官方页面重新搞下 -->
-    <up-form labelPosition="left" :model="form" :rules="rules" ref="uForm">
-        <up-form-item label="贷" prop="form.creditAccount" borderBottom ref="item1"
-            @click="show = true; hideKeyboard(); flag = -1">
-            <up-input v-model="form.creditAccountName" disabled disabledColor="#ffffff" placeholder="贷方科目"
-                border="none"></up-input>
-            <template #right>
-                <up-icon name="arrow-right"></up-icon>
-            </template>
-        </up-form-item>
-        <up-form-item label="借" prop="form.debitAccount" borderBottom ref="item1" @click="show = true; hideKeyboard(); flag = 1">
-            <up-input v-model="form.debitAccountName" disabled disabledColor="#ffffff" placeholder="借方科目"
-                border="none"></up-input>
-            <template #right>
-                <up-icon name="arrow-right"></up-icon>
-            </template>
-        </up-form-item>
-        <up-form-item label="金额" prop="form.amt" borderBottom ref="item1">
-            <up-input placeholder="请输入金额" border="surround" v-model="form.amt"></up-input>
-        </up-form-item>
-        <up-form-item label="备注" prop="form.remark" borderBottom ref="item1">
-            <up-textarea v-model="form.remark" placeholder="请输入备注"></up-textarea>
-        </up-form-item>
-        <up-button @click="save" text="记账"></up-button>
-    </up-form>
-
-    <up-picker :show="show" :columns="columns" ref="uPickerRef" @cancel="cancel" @confirm="confirm" keyName="label"
-        @change="changeHandler"></up-picker>
+    <view style="width:750rpx; height:750rpx"><l-echart ref="chartRef"></l-echart></view>
 </template>
 
 <script setup lang="ts">
-// 使用unplugin-auto-import自动引入vue这些, https://blog.csdn.net/qq_18798149/article/details/134321097
-import { onMounted, reactive, ref } from "vue";
-import type { AccountVO } from "@/api/acct/account/types";
-import { onLoad } from "@dcloudio/uni-app";
-// import {onLoad,onReady} from "@dcloudio/uni-app";
-import { getAccountClsSelect } from '@/api/acct/account-cls';
-import type { ComponentOptions } from '@/api/acct/common-types'
+import { onMounted, ref } from 'vue';
+import * as echarts from 'echarts'
 
-const show = ref(false);
-const flag = ref(0);
-
-const columns = reactive([
-    [{id:'001', label: '资产'}, {id: '002', label: '负债'}, {id: '003', label: '收入'}, {id: '004', label: '支出'}]
-]);
-
-const columnData = reactive([]);
-
-const uPickerRef = ref(null)
-const changeHandler = (e) => {
-    const {
-        columnIndex,
-        value,
-        values,
-        index,
-    } = e;
-
-    if (columnIndex === 0) {
-        uPickerRef.value.setColumnValues(1, columnData[index]);
-    }
-
-    console.log('changeHandler', e, columnData[index]);
+const chartRef = ref(null)
+const option = {
+	tooltip: {
+		trigger: 'axis',
+		axisPointer: {
+			type: 'shadow' 
+		},
+		confine: true
+	},
+	legend: {
+		data: ['热度', '正面', '负面']
+	},
+	grid: {
+		left: 20,
+		right: 20,
+		bottom: 15,
+		top: 40,
+		containLabel: true
+	},
+	xAxis: [
+		{
+			type: 'value',
+			axisLine: {
+				lineStyle: {
+					color: '#999999'
+				}
+			},
+			axisLabel: {
+				color: '#666666'
+			}
+		}
+	],
+	yAxis: [
+		{
+			type: 'category',
+			axisTick: { show: false },
+			data: ['汽车之家', '今日头条', '百度贴吧', '一点资讯', '微信', '微博', '知乎'],
+			axisLine: {
+				lineStyle: {
+					color: '#999999'
+				}
+			},
+			axisLabel: {
+				color: '#666666'
+			}
+		}
+	],
+	series: [
+		{
+			name: '热度',
+			type: 'bar',
+			label: {
+				normal: {
+					show: true,
+					position: 'inside'
+				}
+			},
+			data: [300, 270, 340, 344, 300, 320, 310],
+		},
+		{
+			name: '正面',
+			type: 'bar',
+			stack: '总量',
+			label: {
+				normal: {
+					show: true
+				}
+			},
+			data: [120, 102, 141, 174, 190, 250, 220]
+		},
+		{
+			name: '负面',
+			type: 'bar',
+			stack: '总量',
+			label: {
+				normal: {
+					show: true,
+					position: 'left'
+				}
+			},
+			data: [-20, -32, -21, -34, -90, -130, -110]
+		}
+	]
 };
 
-const form = reactive<AccountVO>({
-    id: 0,
-    createdBy: '',
-    createdDate: new Date(),
-    creditAccount: '',
-    debitAccount: '',
-    creditAccountName: '',
-    debitAccountName: '',
-    amt: 0,
-    remkark: '',
-    type: 1
+
+onMounted( ()=>{
+	// 组件能被调用必须是组件的节点已经被渲染到页面上
+	setTimeout(async()=>{
+		if(!chartRef.value) return
+		const myChart = await chartRef.value.init(echarts)
+		myChart.setOption(option)
+	},300)
 })
 
-const hideKeyboard = () => {
-    uni.hideKeyboard()
-}
-
-const confirm = (e) => {
-    if(flag.value === -1){
-        form.creditAccount = e.value[1].id
-        form.creditAccountName = e.value[1].label
-    }else if (flag.value === 1){
-        form.debitAccount = e.value[1].id
-        form.debitAccountName = e.value[1].label
-    }
-    console.log('confirm', e, flag.value)
-    show.value = false
-}
-const cancel = (e) => {
-    // console.log('cancel');
-    show.value = false
-}
-
-const save = async () => {
-    console.log('save', form)
-}
-
-onMounted(async () => {
-    const res = await getAccountClsSelect()
-    res.forEach(item => {
-        const tmpOptions: ComponentOptions = reactive([])
-        tmpOptions.push(...item.children)
-        columnData.push(tmpOptions)
-    })
-});
-
-onLoad(() => {
-    console.log('onload')
-})
 </script>

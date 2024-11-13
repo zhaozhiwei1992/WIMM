@@ -37,6 +37,7 @@ import { onLoad } from "@dcloudio/uni-app";
 // import {onLoad,onReady} from "@dcloudio/uni-app";
 import { getAccountClsSelect } from '@/api/acct/account-cls';
 import type { ComponentOptions } from '@/api/acct/common-types'
+import { saveApi } from "@/api/acct/account";
 
 const show = ref(false);
 const flag = ref(0);
@@ -98,6 +99,12 @@ const cancel = (e) => {
 
 const save = async () => {
     console.log('save', form)
+    await saveApi(form)
+    // 提示保存成功
+    uni.showToast({
+        title: '保存成功',
+        icon: 'success'
+    })
 }
 
 onMounted(async () => {

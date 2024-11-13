@@ -20,7 +20,7 @@
         "modules" : {
             "SQLite": {                   
                 //JSON对象，SQLite(统计)
-                "description": "iBeacon"
+                "description": "SQLite数据库"
             }
         },
         /* 应用发布信息 */

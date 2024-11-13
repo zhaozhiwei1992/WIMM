@@ -41,6 +41,12 @@
 			}
 		},
 		{
+			"path": "pages/report/DebitAnalyze",
+			"style": {
+				"navigationBarTitleText": "支出分析"
+			}
+		},
+		{
 			"path": "pages/mine/index",
 			"style": {
 				"navigationBarTitleText": "我的"

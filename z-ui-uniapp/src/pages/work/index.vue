@@ -91,6 +91,8 @@ function changeGrid(obj) {
 
   } else if (i === 3) {
     uni.navigateTo({ url: "/pages/report/CreditAnalyze" });
+  } else if (i === 4) {
+    uni.navigateTo({ url: "/pages/report/DebitAnalyze" });
   }
   // uni.showToast({
   //   title: "模块建设中~",

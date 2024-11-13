@@ -5,8 +5,20 @@
 
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { DatabaseHelper } from "./plugins/sqlite/db";
 onLaunch(() => {
   console.log("App Launch");
+
+  // 初始化数据库
+  const db = new DatabaseHelper();
+  async () => {
+    try {
+      await db.init();
+      console.log('数据库初始化成功');
+    } catch (err) {
+      console.error('数据库初始化失败', err);
+    }
+  };
 });
 onShow(() => {
   console.log("App Show");
