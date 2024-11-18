@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:z_ui_flutter/model/account_cls.dart';
+import 'package:z_ui_flutter/services/database.dart';
 
 class AccountFormPage extends StatefulWidget {
   @override
@@ -64,6 +65,10 @@ class _AccountFormPageState extends State<AccountFormPage> {
     if (_formKey.currentState!.validate()) {
       // 处理表单提交逻辑
       print('贷方: $_creditAccount, 借方: $_debitAccount');
+
+      // TODO 
+      var db = MyDatabase();
+      
       // 清空表单字段
       _creditAccount = '';
       _debitAccount = '';
