@@ -14,4 +14,19 @@ class AccountCls {
           .toList() ?? [],
     );
   }
+
+  // toString
+  @override
+  String toString() {
+    return 'AccountCls{id: $id, name: $name, children: $children}';
+  }
+
+  // toMap
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'children': children.map((child) => child.toMap()).toList(),
+    };
+  }
 }

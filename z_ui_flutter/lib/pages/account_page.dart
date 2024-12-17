@@ -1,10 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:z_ui_flutter/model/account_cls.dart';
-import 'package:z_ui_flutter/services/database.dart';
+import 'package:z_ui_flutter/model/account_vou_detail.dart';
+import 'package:z_ui_flutter/repository/account_vou_detail_repository.dart';
+import 'package:z_ui_flutter/services/database_helper_service.dart';
 
 class AccountFormPage extends StatefulWidget {
   @override
@@ -66,9 +68,21 @@ class _AccountFormPageState extends State<AccountFormPage> {
       // 处理表单提交逻辑
       print('贷方: $_creditAccount, 借方: $_debitAccount');
 
-      // TODO 
-      var db = MyDatabase();
-      
+      final dbHelper = DatabaseService.databaseHelper;
+
+      dbHelper.insertAcctVouDetail(AcctVouDetail(
+        id: '1',
+        voucherNo: '1',
+        acctClsCode: '1',
+        acctClsName: '1',
+        amt: '1',
+        drCr: '1',
+        remark: '1',
+        createdBy: '1',
+        createdDate: '1',
+        lastModifiedBy: '1',
+      ));
+
       // 清空表单字段
       _creditAccount = '';
       _debitAccount = '';
