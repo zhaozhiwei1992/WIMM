@@ -1,6 +1,6 @@
 # 指定与您的应用相关的基本信息，例如其当前版本、依赖项以及其随附的资源。
 name: z_ui_flutter
-description: "A new Flutter project."
+description: "记账移动端，单机"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -19,18 +19,14 @@ dependencies:
   fl_chart: ^0.69.0
   sqflite: ^2.4.1
   path: ^1.9.0
-  # drift: ^2.21.0
-  sqlite3_flutter_libs: ^0.5.26
   path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
   json_serializable: ^6.8.0
-  # build_runner: ^2.4.13
-  # drift_dev: ^2.21.2
 
 flutter:
   uses-material-design: true

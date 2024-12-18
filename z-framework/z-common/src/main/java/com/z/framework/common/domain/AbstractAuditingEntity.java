@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
@@ -59,7 +60,9 @@ public abstract class AbstractAuditingEntity implements Serializable {
     @PrePersist
     @PreUpdate
     public void prePersist() {
-        this.tenantId = TenantContext.getTenantId();
+        if(!StringUtils.hasText(tenantId)){
+            this.tenantId = TenantContext.getTenantId();
+        }
     }
 
 }

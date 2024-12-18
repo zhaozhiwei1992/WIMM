@@ -8,6 +8,7 @@ import { Screenfull } from '@/components/Screenfull'
 import { Breadcrumb } from '@/components/Breadcrumb'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import { AcctCate } from '@/components/AcctCate'
 
 const { getPrefixCls, variables } = useDesign()
 
@@ -33,6 +34,9 @@ const layout = computed(() => appStore.getLayout)
 // 多语言图标
 const locale = computed(() => appStore.getLocale)
 
+// 记账类型 个人/家庭
+const value5 = computed(() => appStore.getAcctCate)
+
 export default defineComponent({
   name: 'ToolHeader',
   setup() {
@@ -54,6 +58,9 @@ export default defineComponent({
           </div>
         ) : undefined}
         <div class="h-full flex items-center">
+          {screenfull.value ? (
+            <AcctCate class="hover-trigger" color="var(--top-header-text-color)"></AcctCate>
+          ) : undefined}
           {screenfull.value ? (
             <Screenfull class="hover-trigger" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}

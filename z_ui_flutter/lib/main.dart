@@ -2,7 +2,6 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ui_flutter/pages/home_page.dart';
-import 'package:z_ui_flutter/repository/database_helper.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

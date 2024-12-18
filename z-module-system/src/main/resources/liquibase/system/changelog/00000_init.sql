@@ -137,13 +137,11 @@ INSERT INTO sys_menu (
 (15, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '用户管理', 1, 2, TRUE, 'user', 'views/system/User/Index', '1', 'system:user:view'),
 (16, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '角色管理', 2, 2, TRUE, 'role', 'views/system/Role/Index', '1', 'system:role:view'),
 (17, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '菜单管理', 3, 2, TRUE, 'menu', 'views/system/Menu/Index', '1', 'system:menu:view'),
-(22, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '定时任务管理', 8, 2, TRUE, 'task', 'views/framework/job/Index', '1', 'system:task:view'),
 (23, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '会计科目维护', 1, 7, TRUE, 'acct-cls', 'views/acct/AccountCls/Index', '1', 'acct:AccountCls:view'),
 (24, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记个账', 2, 7, TRUE, 'acct', 'views/acct/Account/components/AddOrUpdate', '1', 'acct:Account:view'),
 (25, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记账查看', 2, 7, TRUE, 'acct', 'views/acct/Account/Index', '1', 'acct:Account:view'),
 (50, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '登录日志', 1, 6, TRUE, 'login', 'views/system/LoginLog/Index', '1', 'log:login:view'),
 (51, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '接口请求日志', 2, 6, TRUE, 'request', 'views/system/RequestLog/Index', '1', 'log:request:view'),
-(52, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '定时任务日志', 3, 6, TRUE, 'task', 'views/framework/job/TaskLog/Index', '1', 'log:task:view'),
 (91, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '服务监控',2, 4, TRUE, 'server', 'views/framework/monitor/ServerInfoIndex', '1', 'monitor:server:view'),
 (92, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '缓存监控',3, 4, TRUE, 'cache', 'views/framework/monitor/CacheListIndex', '1', 'monitor:cache:view');
 

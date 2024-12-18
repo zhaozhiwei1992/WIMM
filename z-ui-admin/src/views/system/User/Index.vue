@@ -215,9 +215,6 @@ const save = async () => {
     if (isValid) {
       loading.value = true
       const data = (await write?.getFormData()) as UserVO
-      // 数据特殊处理
-      data.departmentIdListStr = data.departmentIdListStr.join(',')
-      console.log(data)
       const res = await saveTableApi(data)
         .catch(() => {})
         .finally(() => {

@@ -35,6 +35,7 @@ interface AppState {
   footer: boolean
   theme: ThemeTypes
   fixedMenu: boolean
+  acctCate: boolean
 }
 
 export const useAppStore = defineStore('app', {
@@ -95,7 +96,8 @@ export const useAppStore = defineStore('app', {
         topHeaderHoverColor: '#f6f6f6',
         // 头部边框颜色
         topToolBorderColor: '#eee'
-      }
+      },
+      acctCate: false // 是否显示账户类型
     }
   },
   getters: {
@@ -173,6 +175,9 @@ export const useAppStore = defineStore('app', {
     },
     getFooter(): boolean {
       return this.footer
+    },
+    getAcctCate(): boolean {
+      return this.acctCate
     }
   },
   actions: {
@@ -266,6 +271,9 @@ export const useAppStore = defineStore('app', {
     },
     setFooter(footer: boolean) {
       this.footer = footer
+    },
+    setAcctCate(acctCate: boolean) {
+      this.acctCate = acctCate
     }
   }
 })

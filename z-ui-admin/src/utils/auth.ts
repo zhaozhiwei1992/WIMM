@@ -29,6 +29,11 @@ export const removeToken = () => {
   wsCache.delete(RefreshTokenKey)
 }
 
+// 获取租户id
+export const getTenantId = () => {
+  return wsCache.get('TENANT_ID')
+}
+
 // 登录表单, 安全处理
 
 const LoginFormKey = 'LOGINFORM'

@@ -1,6 +1,7 @@
 package com.z.module.system.aop;
 
 import cn.hutool.core.util.StrUtil;
+import com.z.framework.common.domain.TenantContext;
 import com.z.framework.security.util.SecurityUtils;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
@@ -150,11 +151,12 @@ public class CustomStatementInspector implements StatementInspector {
 
             // 换表
             this.replaceTable(fromTable);
+            String tenantId = TenantContext.getTenantId();
 
             // 多租户，增加tenantId过滤
             String currentLoginName = SecurityUtils.getCurrentLoginName();
             if (!"admin".equals(currentLoginName)) {
-                //
+                // TODO 根据传入个人或者家庭, 分别拼接创建人或者租户条件
             }
 
             //TODO  这里可扩展

@@ -21,6 +21,7 @@ export interface UserVO {
   departmentIdListStr: string | string[]
   phonenumber: string
   email: string
+  tenantId: string
 }
 
 export interface PasswordResetVO {

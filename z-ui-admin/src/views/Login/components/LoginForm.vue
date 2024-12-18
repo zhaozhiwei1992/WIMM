@@ -151,6 +151,8 @@ const signIn = async () => {
           // 设置token id
           // wsCache.set('token', res.data.token)
           authUtil.setToken(res)
+          // 设置租户id
+          wsCache.set('TENANT_ID', res.tenantId)
           // 使用后端动态路由只需要把这里放开
           appStore.setDynamicRouter(true)
           if (appStore.getDynamicRouter) {

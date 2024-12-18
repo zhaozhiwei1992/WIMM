@@ -12,7 +12,7 @@ import { config } from './config'
 
 import { ElMessage } from 'element-plus'
 
-import { getAccessToken } from '@/utils/auth'
+import { getAccessToken, getTenantId } from '@/utils/auth'
 
 const { result_code, base_url } = config
 
@@ -39,6 +39,7 @@ service.interceptors.request.use(
     }
     // 请求后端接口时header里把token带上
     ;(config.headers as AxiosRequestHeaders)['Authorization'] = getAccessToken()
+    ;(config.headers as AxiosRequestHeaders)['tenantId'] = getTenantId()
     // get参数编码
     if (config.method === 'get' && config.params) {
       let url = config.url as string

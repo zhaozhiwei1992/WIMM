@@ -92,7 +92,7 @@ onMounted(async () => {
       <ElFormItem label="贷">
         <ElCascader
           placeholder="支出"
-          v-model="form.debitAccount"
+          v-model="form.creditAccount"
           :options="acctClsOptions"
           :props="{ emitPath: false }"
           filterable
@@ -101,7 +101,7 @@ onMounted(async () => {
       <ElFormItem label="借">
         <ElCascader
           placeholder="收入"
-          v-model="form.creditAccount"
+          v-model="form.debitAccount"
           :options="acctClsOptions"
           :props="{ emitPath: false }"
           filterable
