@@ -34,9 +34,6 @@ const layout = computed(() => appStore.getLayout)
 // 多语言图标
 const locale = computed(() => appStore.getLocale)
 
-// 记账类型 个人/家庭
-const value5 = computed(() => appStore.getAcctCate)
-
 export default defineComponent({
   name: 'ToolHeader',
   setup() {

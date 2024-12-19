@@ -14,6 +14,11 @@ import { ElMessage } from 'element-plus'
 
 import { getAccessToken, getTenantId } from '@/utils/auth'
 
+import { useAppStore } from '@/store/modules/app'
+import { computed } from 'vue'
+
+const appStore = useAppStore()
+
 const { result_code, base_url } = config
 
 export const PATH_URL = base_url[import.meta.env.VITE_API_BASEPATH]
@@ -40,6 +45,9 @@ service.interceptors.request.use(
     // 请求后端接口时header里把token带上
     ;(config.headers as AxiosRequestHeaders)['Authorization'] = getAccessToken()
     ;(config.headers as AxiosRequestHeaders)['tenantId'] = getTenantId()
+    const acctCate = computed(() => appStore.getAcctCate).value
+    console.log('acctCate', acctCate)
+    ;(config.headers as AxiosRequestHeaders)['acctCate'] = acctCate
     // get参数编码
     if (config.method === 'get' && config.params) {
       let url = config.url as string

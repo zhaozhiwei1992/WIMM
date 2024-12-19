@@ -230,6 +230,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                     extensionMap.put("year", LocalDateTime.now().getYear());
                     extensionMap.put("tenantId", m.get("tenantId").toString());
                     TenantContext.setTenantId(String.valueOf(extensionMap.get("tenantId")));
+                    extensionMap.put("acctCate", request.getHeader("acctCate"));
 
                     // 可以这里添加其它必要信息
                     authenticationToken.setDetails(extensionMap);

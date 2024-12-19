@@ -95,6 +95,11 @@ public final class SecurityUtils {
         return (String)getAuthenticationDetails().get("tenantId");
     }
 
+    // 获取个人/家庭记账类型
+    public static String getAcctCate(){
+        return (String)getAuthenticationDetails().get("acctCate");
+    }
+
     /**
      * 取得当前用户的ID
      * @return

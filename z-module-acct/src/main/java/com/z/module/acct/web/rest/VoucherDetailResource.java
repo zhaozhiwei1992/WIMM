@@ -72,7 +72,8 @@ public class VoucherDetailResource {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo", "drCr");
         // 分页
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize(), sort);
-        Page<VoucherDetail> all = voucherDetailRepository.findAll(ex, pageable);
+//        Page<VoucherDetail> all = voucherDetailRepository.findAll(ex, pageable);
+        Page<VoucherDetail> all = voucherDetailRepository.findAll(pageable);
 
         return new HashMap<>() {{
             put("list", all.getContent());

@@ -97,7 +97,7 @@ export const useAppStore = defineStore('app', {
         // 头部边框颜色
         topToolBorderColor: '#eee'
       },
-      acctCate: false // 是否显示账户类型
+      acctCate: false // 个人/家庭类型
     }
   },
   getters: {

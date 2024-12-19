@@ -9,6 +9,7 @@ import { useTable } from '@/hooks/web/useTable'
 import { AccountVO, VoucherDetailVO } from '@/api/acct/account/types'
 import { ref, reactive, h } from 'vue'
 import { CrudSchema, useCrudSchemas } from '@/hooks/web/useCrudSchemas'
+import { useCache } from '@/hooks/web/useCache'
 
 const { register, tableObject, methods } = useTable<VoucherDetailVO>({
   getListApi: getTableListApi,
@@ -135,6 +136,10 @@ const delData = async (row: AccountVO | null, multiple: boolean) => {
     delLoading.value = false
   })
 }
+
+const { wsCache } = useCache()
+const userInfo = wsCache.get('userInfo')
+const username = userInfo.username
 </script>
 
 <template>
@@ -166,7 +171,7 @@ const delData = async (row: AccountVO | null, multiple: boolean) => {
       border
     >
       <template #action="{ row }">
-        <ElButton v-if="row.createdBy != 'system'" type="danger" @click="delData(row, false)">
+        <ElButton type="danger" @click="delData(row, false)" v-if="row.createdBy == username">
           {{ t('exampleDemo.del') }}
         </ElButton>
       </template>
