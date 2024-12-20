@@ -1,25 +1,5 @@
 <template>
   <view class="work-container">
-    <!-- 轮播图 -->
-    <uni-swiper-dot
-      class="uni-swiper-dot-box"
-      :info="data"
-      :current="current"
-      field="content"
-    >
-      <swiper
-        class="swiper-box"
-        :current="swiperDotIndex"
-        @change="changeSwiper"
-      >
-        <swiper-item v-for="(item, index) in data" :key="index">
-          <view class="swiper-item" @click="clickBannerItem(item)">
-            <image :src="item.image" mode="aspectFill" :draggable="false" />
-          </view>
-        </swiper-item>
-      </swiper>
-    </uni-swiper-dot>
-
     <!-- 宫格组件 -->
     <uni-section title="工作空间" type="line"></uni-section>
     <view class="grid-body">
@@ -48,47 +28,44 @@ const dynamicGrid = reactive([
     text: "记个账",
   },
   {
-    type: "color",
+    type: "download-filled",
     text: "记账导出",
   },
   {
-    type: "color",
+    type: "upload-filled",
     text: "记账导入",
   },
   {
-    type: "staff-filled",
+    type: "wallet-filled",
     text: "收入分析",
   },
   {
-    type: "staff-filled",
+    type: "wallet-filled",
     text: "支出分析",
+  },
+  {
+    type: "locked-filled",
+    text: "预算管理",
+  },
+  {
+    type: "notification-filled",
+    text: "账单提醒",
+  },
+  {
+    type: "wallet-filled",
+    text: "资产负债表",
   },
 ]);
 
-const data = reactive([
-  { image: "/static/images/banner/banner02.jpg" },
-  { image: "/static/images/banner/banner03.jpg" },
-]);
-const current = ref(0);
-const swiperDotIndex = ref(0);
-
-function clickBannerItem(item) {
-  console.info(item);
-}
-
-function changeSwiper(e: any) {
-  current.value = e.detail.current;
-}
-
 function changeGrid(obj) {
   const i = obj.detail.index
-  console.log(i)
   if (i === 0) {
     uni.switchTab({ url: "/pages/acct/AddAccount" });
   } else if (i === 1) {
-
+    // 调用后台下载记账明细数据
+    exportData()
   } else if (i === 2) {
-
+    importData()
   } else if (i === 3) {
     uni.navigateTo({ url: "/pages/report/CreditAnalyze" });
   } else if (i === 4) {
@@ -99,6 +76,56 @@ function changeGrid(obj) {
   //   image: "https://cdn.uviewui.com/uview/demo/toast/error.png",
   //   duration: 2000,
   // });
+}
+
+const importData = () => {
+  // 导入数据
+}
+
+const exportData = () => {
+  // 导出
+  let header = {
+    'X-Access-Token': uni.getStorageSync(SET_TOKEN) 
+  }
+
+  uni.request({
+      url: 'http://......', // 后端请求地址
+      method: 'GET',
+      header: header,
+      responseType: 'arraybuffer',
+      data: {}
+    })
+    .then((res) => {
+      const fileName = new Date().getTime() + '.xlsx'
+      const arrayBuffer = res[1].data // utf-8编码的文件数据
+      const base64String = uni.arrayBufferToBase64(arrayBuffer)
+      const buffer = uni.base64ToArrayBuffer(base64String)
+      let fs = uni.getFileSystemManager()
+      const filePath = wx.env.USER_DATA_PATH + '/' + fileName
+      fs.writeFile({
+        filePath: filePath,
+        data: buffer,
+        encoding: 'binary',
+        success: (res) => {
+          console.log('文件保存成功')
+          uni.openDocument({
+            filePath: filePath,
+            fileType: 'xlsx',
+            showMenu: true,
+            success: () => {
+              console.log('文件预览成功')
+              // 构建分享内容
+            },
+            fail: (error) => {
+              console.error('文件保存失败', error)
+            }
+          })
+        },
+        fail: (err) => {
+          console.log('文件保存失败', err)
+        }
+      })
+    })
 }
 
 // 如果需要在组件挂载后执行某些操作，可以使用 onMounted 钩子

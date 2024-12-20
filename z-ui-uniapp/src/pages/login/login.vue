@@ -33,7 +33,9 @@
               </uni-forms-item>
             </uni-forms>
             <button @click="signIn">登录</button>
+            <!--
             <button @click="toRegister">去注册</button>
+            -->
           </uni-card>
         </view>
         <view v-if="current === 1">
@@ -123,7 +125,7 @@ const signIn = async () => {
     uni.setStorageSync("token", res.token);
     uni.setStorageSync("username", res.username);
     // 跳转首页, 首页是tabBar需要用switchTab
-    uni.switchTab({ url: "/pages/index/index" });
+    uni.switchTab({ url: "/pages/acct/AddAccount" });
   }
 };
 
@@ -139,6 +141,6 @@ const onClickItem = (e: any) => {
 
 onMounted(() => {
   // 如果是单机版直接跳转首页
-  uni.switchTab({ url: "/pages/acct/AddAccount" });
+  // uni.switchTab({ url: "/pages/acct/AddAccount" });
 });
 </script>

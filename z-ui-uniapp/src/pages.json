@@ -11,21 +11,21 @@
 	},
 	"pages": [
 		{
-			"path": "pages/acct/AddAccount",
-			"style": {
-				"navigationBarTitleText": "记账"
-			}
-		},
-		{
 			"path": "pages/login/login",
 			"style": {
 				"navigationBarTitleText": "登录"
 			}
 		},
 		{
+			"path": "pages/acct/AddAccount",
+			"style": {
+				"navigationBarTitleText": "记账"
+			}
+		},
+		{
 			"path": "pages/login/register",
 			"style": {
-				"navigationBarTitleText": "登录"
+				"navigationBarTitleText": "注册"
 			}
 		},
 		{

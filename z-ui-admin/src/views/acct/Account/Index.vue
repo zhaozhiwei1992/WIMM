@@ -140,6 +140,14 @@ const delData = async (row: AccountVO | null, multiple: boolean) => {
 const { wsCache } = useCache()
 const userInfo = wsCache.get('userInfo')
 const username = userInfo.username
+
+const importData = () => {
+  // 导入数据
+}
+
+const exportData = () => {
+  // 导出
+}
 </script>
 
 <template>
@@ -155,6 +163,8 @@ const username = userInfo.username
       <ElButton :loading="delLoading" type="danger" @click="delData(null, true)">
         {{ t('exampleDemo.del') }}
       </ElButton>
+      <ElButton :loading="delLoading" @click="importData()"> 导入 </ElButton>
+      <ElButton :loading="delLoading" @click="exportData()"> 导出 </ElButton>
     </div>
 
     <Table

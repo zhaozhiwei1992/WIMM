@@ -50,6 +50,7 @@
         <uni-list-item showArrow title="常见问题" clickable @click="handleHelp" />
         <uni-list-item showArrow title="关于我们" clickable @click="handleAbout" />
         <uni-list-item showArrow title="应用设置" clickable @click="handleToSetting" />
+        <uni-list-item showArrow title="退出登录" clickable @click="handleToLogOut" />
       </uni-list>
     </view>
   </view>
@@ -88,6 +89,11 @@ const handleToSetting = (e) => {
 
 const handleToLogin = (e) => {
   uni.navigateTo({ url: "/pages/login" });
+};
+
+// 退出登录
+const handleToLogOut = (e) => {
+  uni.navigateTo({ url: "/pages/login/login" });
 };
 
 const handleToAvatar = (e) => {

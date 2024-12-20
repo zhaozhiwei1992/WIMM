@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ import java.util.*;
  */
 @Tag(name = "登录API")
 @RestController
-@RequestMapping(value = {"/system/mobile"})
+@RequestMapping(value = {"/mobile"})
 @Slf4j
 public class MobileLoginResource {
 
@@ -142,6 +143,51 @@ public class MobileLoginResource {
         } catch (Exception e) {
             logger.error("登录出错", e);
             throw new RuntimeException("登录出错");
+        }
+    }
+
+    @Operation(description = "手机号一键登录")
+    @PostMapping("/number")
+    public AuthedRespVO loginPhoneNum(@RequestParam String phoneNum, HttpServletRequest request) {
+
+        // 1. 根据手机号获取用户信息
+        Optional<User> oneByPhoneNumber = userRepository.findOneByPhoneNumber(phoneNum);
+        if(oneByPhoneNumber.isPresent()){
+            User user = oneByPhoneNumber.get();
+            // 2. 登录认证
+            final AuthedRespVO authedRespVO = new AuthedRespVO();
+            authedRespVO.setUsername(user.getLogin());
+
+            try {
+                log.info("登录用户信息 {}", user);
+                String username = user.getLogin();
+                String password = user.getPassword();
+                final User dbUser = userRepository.findOneByLogin(username).orElse(new User());
+                logger.info("查询用户信息 {}", dbUser);
+                String dbPassWord = dbUser.getPassword();
+                logger.info("数据库密码: {}", dbPassWord);
+                if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
+                    String token = tokenProviderService.generateToken(username, true, dbUser.getTenantId());
+                    authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
+                    authedRespVO.setToken(token);
+
+                    // 登录成功记录日志
+                    LoginVO loginVO = new LoginVO();
+                    loginVO.setUsername(user.getLogin());
+                    loginVO.setRememberMe(true);
+                    loginLogService.save(loginVO, request);
+                    return authedRespVO;
+                }else{
+                    log.error("登录失败, 用户: {}, 密码: {}, 数据库密码: {}", username, password, dbPassWord);
+                    throw new RuntimeException(String.format("用户密码不匹配, 登录用户: %s, 密码: %s", username, password));
+                }
+            } catch (Exception e) {
+                logger.error("登录出错", e);
+                throw new RuntimeException("登录出错");
+            }
+        }else{
+            log.error("登录失败, 手机号: {}", phoneNum);
+            throw new RuntimeException("用户未注册");
         }
     }
 }
