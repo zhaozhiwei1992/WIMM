@@ -1,16 +1,27 @@
 package com.z.module.acct.web.rest;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.z.framework.security.util.SecurityUtils;
 import com.z.module.acct.domain.VoucherDetail;
 import com.z.module.acct.repository.VoucherDetailRepository;
+import com.z.module.acct.web.mapper.VoucherDetailMapper;
+import com.z.module.acct.web.vo.AccountVO;
+import com.z.module.acct.web.vo.VoucherDetailVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,8 +42,9 @@ public class VoucherDetailResource {
 
     private final VoucherDetailRepository voucherDetailRepository;
 
-    public VoucherDetailResource(VoucherDetailRepository voucherDetailRepository) {
+    public VoucherDetailResource(VoucherDetailRepository voucherDetailRepository, VoucherDetailMapper voucherDetailMapper) {
         this.voucherDetailRepository = voucherDetailRepository;
+        this.voucherDetailMapper = voucherDetailMapper;
     }
 
     /**
@@ -91,6 +103,26 @@ public class VoucherDetailResource {
         List<String> list = allById.stream().map(VoucherDetail::getVoucherNo).toList();
         voucherDetailRepository.deleteAllByVoucherNoIn(list);
         return "success";
+    }
+
+    private final VoucherDetailMapper voucherDetailMapper;
+
+    @GetMapping("/voucher/export")
+    public void export(HttpServletResponse response) throws IOException {
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("记账明细", StandardCharsets.UTF_8);
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+        // 获取要下载的数据
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo", "drCr");
+        List<VoucherDetail> all = voucherDetailRepository.findAll(sort);
+        ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), VoucherDetailVO.class);
+        List<VoucherDetailVO> convert = voucherDetailMapper.convert(all);
+        write.sheet("记账明细").doWrite(convert);
+        // 生成图表展现, 类似echart
+//        write.sheet("收入支出情况表").doWrite();
     }
 
 }

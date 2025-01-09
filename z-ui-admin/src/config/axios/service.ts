@@ -75,12 +75,13 @@ service.interceptors.request.use(
 // response 拦截器
 service.interceptors.response.use(
   (response: AxiosResponse<any>) => {
+    console.log('response', response)
     if (
       response.config.responseType === 'blob' ||
       response.config.responseType === 'arraybuffer' ||
-      response.headers.responsetype === 'text'
+      response.headers.responsetype === 'text' ||
+      response.headers.contentType === 'blob'
     ) {
-      // 如果是文件流，直接返回response
       return response
     } else if (response.status === result_code) {
       return response.data

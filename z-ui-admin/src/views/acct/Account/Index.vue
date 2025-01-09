@@ -4,7 +4,7 @@ import { Search } from '@/components/Search'
 import { useI18n } from '@/hooks/web/useI18n'
 import { ElButton, ElTag } from 'element-plus'
 import { Table } from '@/components/Table'
-import { getTableListApi, delTableListApi } from '@/api/acct/account'
+import { getTableListApi, delTableListApi, exportVoucherDetailApi } from '@/api/acct/account'
 import { useTable } from '@/hooks/web/useTable'
 import { AccountVO, VoucherDetailVO } from '@/api/acct/account/types'
 import { ref, reactive, h } from 'vue'
@@ -146,7 +146,8 @@ const importData = () => {
 }
 
 const exportData = () => {
-  // 导出
+  // 导出为excel
+  exportVoucherDetailApi({ voucherNo: tableObject.currentRow?.voucherNo })
 }
 </script>
 

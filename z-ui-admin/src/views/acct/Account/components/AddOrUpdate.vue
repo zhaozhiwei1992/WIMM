@@ -13,9 +13,6 @@ const { t } = useI18n()
 
 const loading = ref(false)
 
-// 1 收入, 2支出
-const activeName = ref('exp')
-
 const form = reactive<AccountVO>({
   id: 0,
   createdBy: '',
@@ -33,43 +30,26 @@ const rules = reactive<FormRules<AccountVO>>({
   amt: [{ required: true, message: t('rules.required'), trigger: 'blur' }]
 })
 
-const elFormRefInc = ref<FormInstance>()
 const elFormRefExp = ref<FormInstance>()
 
 const save = async () => {
-  if (activeName.value === '1') {
-    await elFormRefInc.value?.validate(async (isValid) => {
-      if (isValid) {
-        loading.value = true
-        const res = await saveApi(form)
-        if (res) {
-          // 清空表单
-          resetForm()
-        }
+  await elFormRefExp.value?.validate(async (isValid) => {
+    if (isValid) {
+      loading.value = true
+      const res = await saveApi(form)
+      if (res) {
+        ElMessage.success('保存成功')
+        // 清空表单
+        resetForm(elFormRefExp.value)
       }
-    })
-  } else {
-    await elFormRefExp.value?.validate(async (isValid) => {
-      if (isValid) {
-        loading.value = true
-        const res = await saveApi(form)
-        if (res) {
-          ElMessage.success('保存成功')
-          // 清空表单
-          resetForm()
-        }
-      }
-    })
-  }
+    }
+  })
 }
 
-const resetForm = async () => {
+const resetForm = (formEl: FormInstance | undefined) => {
   // 重置表单的逻辑
-  if (activeName.value === 'inc') {
-    elFormRefInc.value?.resetFields()
-  } else if (activeName.value === 'exp') {
-    elFormRefExp.value?.resetFields()
-  }
+  if (!formEl) return
+  formEl.resetFields()
 }
 
 const acctClsOptions = reactive<ComponentOptions[] | any>([])
@@ -89,7 +69,7 @@ onMounted(async () => {
       label-width="auto"
       style="max-width: 600px"
     >
-      <ElFormItem label="贷">
+      <ElFormItem label="贷" prop="creditAccount">
         <ElCascader
           placeholder="支出"
           v-model="form.creditAccount"
@@ -98,7 +78,7 @@ onMounted(async () => {
           filterable
         />
       </ElFormItem>
-      <ElFormItem label="借">
+      <ElFormItem label="借" prop="debitAccount">
         <ElCascader
           placeholder="收入"
           v-model="form.debitAccount"
@@ -107,15 +87,15 @@ onMounted(async () => {
           filterable
         />
       </ElFormItem>
-      <ElFormItem label="金额">
+      <ElFormItem label="金额" prop="amt">
         <ElInput v-model="form.amt" style="width: 240px" placeholder="支出金额，支持运算符" />
       </ElFormItem>
       <ElFormItem label="备注">
-        <ElInput v-model="form.remark" type="textarea" />
+        <ElInput v-model="form.remark" type="textarea" prop="remark" />
       </ElFormItem>
       <ElFormItem>
         <ElButton type="primary" @click="save">记账</ElButton>
-        <ElButton @click="resetForm">重置</ElButton>
+        <ElButton @click="resetForm(elFormRefExp)">重置</ElButton>
       </ElFormItem>
     </ElForm>
   </ContentWrap>

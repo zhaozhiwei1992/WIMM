@@ -255,6 +255,16 @@ watch(
     moveToCurrentTag()
   }
 )
+
+// 使用watcher来监听appStore中类型变化,区分个人还是家庭
+watch(
+  () => appStore.acctCate,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      refreshSelectedTag(currentRoute.value)
+    }
+  }
+)
 </script>
 
 <template>
