@@ -54,7 +54,7 @@ public abstract class AbstractAuditingEntity implements Serializable {
 
     // 租户id, 家庭户号
     @NotNull
-    @Column(unique = true, nullable = false)
+    @Column
     private String tenantId;
 
     @PrePersist

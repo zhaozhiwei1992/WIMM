@@ -1,26 +1,5 @@
-<template>
-  <view class="work-container">
-    <!-- 宫格组件 -->
-    <uni-section title="工作空间" type="line"></uni-section>
-    <view class="grid-body">
-      <uni-grid :column="4" :showBorder="false" @change="changeGrid">
-        <uni-grid-item
-          v-for="(item, index) in dynamicGrid"
-          :index="index"
-          :key="index"
-        >
-          <view class="grid-item-box">
-            <uni-icons :type="item.type" size="30"></uni-icons>
-            <text class="text">{{ item.text }}</text>
-          </view>
-        </uni-grid-item>
-      </uni-grid>
-    </view>
-  </view>
-</template>
-
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { onMounted, reactive } from "vue";
 
 const dynamicGrid = reactive([
   {
@@ -134,6 +113,27 @@ onMounted(() => {
 });
 </script>
 
+<template>
+  <view class="work-container">
+    <!-- 宫格组件 -->
+    <uni-section title="工作空间" type="line"></uni-section>
+    <view class="grid-body">
+      <uni-grid :column="4" :showBorder="false" :horizontal="false" :square="true"  use-virtual :threshold="8"  @change="changeGrid">
+        <uni-grid-item
+          v-for="(item, index) in dynamicGrid"
+          :index="index"
+          :key="index"
+        >
+          <view class="grid-item-box">
+            <uni-icons :type="item.type" size="30"></uni-icons>
+            <text class="text">{{ item.text }}</text>
+          </view>
+        </uni-grid-item>
+      </uni-grid>
+    </view>
+  </view>
+</template>
+
 <style lang="scss">
 .grid-item-box {
   flex: 1;
@@ -143,7 +143,19 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 15px 0;
+  // padding: 15px 0;
+  // 修改后
+  padding: 8px 0;  // 减少垂直间距
+  @media screen and (min-width: 500px) {
+    padding: 12px 0;  // 大屏适当增加
+  }
+  uni-icons {
+    margin-bottom: 4px;  // 原默认8px
+  }
+  .text {
+    font-size: 12px;     // 缩小字体
+    line-height: 1.2;    // 紧凑行高
+  }
 }
 
 .swiper {
@@ -177,6 +189,26 @@ onMounted(() => {
 
   .image {
     width: 100%;
+  }
+}
+
+.uni-grid-item {
+  &:active {
+    background-color: #f5f5f5;
+    opacity: 0.8;
+  }
+}
+
+.uni-grid {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: #eee;
   }
 }
 </style>

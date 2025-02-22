@@ -1,9 +1,9 @@
 import axios, {
+  AxiosError,
   AxiosInstance,
-  InternalAxiosRequestConfig,
   AxiosRequestHeaders,
   AxiosResponse,
-  AxiosError
+  InternalAxiosRequestConfig
 } from 'axios'
 
 import qs from 'qs'
@@ -19,9 +19,11 @@ import { computed } from 'vue'
 
 const appStore = useAppStore()
 
-const { result_code, base_url } = config
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
 
-export const PATH_URL = base_url[import.meta.env.VITE_API_BASEPATH]
+const { result_code } = config
+
+export const PATH_URL = VITE_SERVER_URL + '/api'
 
 //带着cookie, 验证码放在了session里, 不加这个每次session都是新的
 axios.defaults.withCredentials = true

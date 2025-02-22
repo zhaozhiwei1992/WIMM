@@ -13,6 +13,7 @@ CREATE TABLE if not exists sys_user (
 	image_url varchar(256) NULL,
 	login varchar(50) NOT NULL,
 	name varchar(50) NULL,
+	avatar int(3) NULL,
 	password_hash varchar(60) NOT NULL
 );
 
@@ -138,7 +139,7 @@ INSERT INTO sys_menu (
 (16, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '角色管理', 2, 2, TRUE, 'role', 'views/system/Role/Index', '1', 'system:role:view'),
 (17, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '菜单管理', 3, 2, TRUE, 'menu', 'views/system/Menu/Index', '1', 'system:menu:view'),
 (23, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '会计科目维护', 1, 7, TRUE, 'acct-cls', 'views/acct/AccountCls/Index', '1', 'acct:AccountCls:view'),
-(24, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记个账', 2, 7, TRUE, 'acct', 'views/acct/Account/components/AddOrUpdate', '1', 'acct:Account:view'),
+(24, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记个账', 2, 7, TRUE, 'acct-add', 'views/acct/Account/components/AddOrUpdate', '1', 'acct:Account:view'),
 (25, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '记账查看', 2, 7, TRUE, 'acct', 'views/acct/Account/Index', '1', 'acct:Account:view'),
 (50, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '登录日志', 1, 6, TRUE, 'login', 'views/system/LoginLog/Index', '1', 'log:login:view'),
 (51, 'system', NOW(), 'system', NOW(), NULL, TRUE, NULL, TRUE, '接口请求日志', 2, 6, TRUE, 'request', 'views/system/RequestLog/Index', '1', 'log:request:view'),
@@ -182,7 +183,7 @@ CREATE TABLE if not exists `acct_account_cls` (
   `set_year` varchar(255)  DEFAULT NULL,
   `order_num` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-)
+);
 
 delete from acct_account_cls ;
 

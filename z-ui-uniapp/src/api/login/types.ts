@@ -14,5 +14,5 @@ export type UserType = {
 
 export interface SmsCodeVO {
   mobile: string
-  scene: number
+  scene: string
 }

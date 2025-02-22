@@ -1,5 +1,9 @@
 {
   "i18n-ally.localesPaths": [
     "src/locales"
-  ]
+  ],
+  "prettier.enable": true,
+  "prettier.requireConfig": true, // 强制使用项目配置
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
 }

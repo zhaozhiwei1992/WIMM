@@ -1,20 +1,20 @@
 import type {
+  AxiosError,
   AxiosInstance,
-  InternalAxiosRequestConfig,
   AxiosRequestHeaders,
   AxiosResponse,
-  AxiosError
-} from 'axios'
+  InternalAxiosRequestConfig
+} from 'axios';
 
-import axios from 'axios'
+import axios from 'axios';
 
 import { UniAdapter } from "uniapp-axios-adapter";
 
-import qs from 'qs'
+import qs from 'qs';
 
-import { config } from './config'
+import { config } from './config';
 
-const { result_code, base_url } = config
+const { result_code } = config
 
 export const PATH_URL = 'http://127.0.0.1:8090/api'
 
@@ -77,7 +77,7 @@ service.interceptors.response.use(
     } else if (response.status === result_code) {
       return response.data
     } else {
-      return response.data
+      return Promise.reject(new Error(response.statusText || 'Error'))
     }
   },
   (error: AxiosError) => {
@@ -86,4 +86,5 @@ service.interceptors.response.use(
   }
 )
 
-export { service }
+export { service };
+

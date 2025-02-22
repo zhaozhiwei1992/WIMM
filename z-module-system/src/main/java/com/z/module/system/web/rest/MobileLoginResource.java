@@ -7,6 +7,7 @@ import com.z.module.system.repository.UserRepository;
 import com.z.module.system.service.LoginLogService;
 import com.z.module.system.web.vo.AuthedRespVO;
 import com.z.module.system.web.vo.LoginVO;
+import com.z.module.system.web.vo.SmsLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -115,39 +116,40 @@ public class MobileLoginResource {
 
     @Operation(description = "验证码登录认证")
     @PostMapping("/login/sms")
-    public AuthedRespVO loginUserSms(@Valid @RequestBody LoginVO loginVM, HttpServletRequest request) {
+    public AuthedRespVO loginUserSms(@Valid @RequestBody SmsLoginVO smsLoginVO, HttpServletRequest request) {
+        // 1. 根据手机号获取用户信息
+        Optional<User> oneByPhoneNumber = userRepository.findOneByPhoneNumber(smsLoginVO.getMobile());
+        if(oneByPhoneNumber.isPresent()){
+            User user = oneByPhoneNumber.get();
+            // 2. 登录认证
+            final AuthedRespVO authedRespVO = new AuthedRespVO();
+            authedRespVO.setUsername(user.getLogin());
 
-        final AuthedRespVO authedRespVO = new AuthedRespVO();
-        authedRespVO.setUsername(loginVM.getUsername());
-
-        try {
-            log.info("登录用户信息 {}", loginVM);
-            String username = loginVM.getUsername();
-            String password = loginVM.getPassword();
-            final User dbUser = userRepository.findOneByLogin(username).orElse(new User());
-            logger.info("查询用户信息 {}", dbUser);
-            String dbPassWord = dbUser.getPassword();
-            logger.info("数据库密码: {}", dbPassWord);
-            if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
-                String token = tokenProviderService.generateToken(username, loginVM.isRememberMe(), dbUser.getTenantId());
-                authedRespVO.setPermissions(Arrays.asList("*.*.*"));
+            try {
+                log.info("登录用户信息 {}", user);
+                String username = user.getLogin();
+                String token = tokenProviderService.generateToken(username, true, user.getTenantId());
+                authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
                 authedRespVO.setToken(token);
 
                 // 登录成功记录日志
-                loginLogService.save(loginVM, request);
+                LoginVO loginVO = new LoginVO();
+                loginVO.setUsername(user.getLogin());
+                loginVO.setRememberMe(true);
+                loginLogService.save(loginVO, request);
                 return authedRespVO;
-            }else{
-                log.error(String.format("登录失败, 用户: %s, 密码: %s, 数据库密码: %s", username, password, dbPassWord));
-                throw new RuntimeException(String.format("用户密码不匹配, 登录用户: %s, 密码: %s", username, password));
+            } catch (Exception e) {
+                logger.error("登录出错", e);
+                throw new RuntimeException("登录出错");
             }
-        } catch (Exception e) {
-            logger.error("登录出错", e);
-            throw new RuntimeException("登录出错");
+        }else{
+            log.error("登录失败, 手机号: {}", smsLoginVO.getMobile());
+            throw new RuntimeException("用户未注册");
         }
     }
 
     @Operation(description = "手机号一键登录")
-    @PostMapping("/number")
+    @PostMapping("/login/number")
     public AuthedRespVO loginPhoneNum(@RequestParam String phoneNum, HttpServletRequest request) {
 
         // 1. 根据手机号获取用户信息

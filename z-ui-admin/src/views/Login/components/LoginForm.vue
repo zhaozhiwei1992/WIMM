@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { reactive, ref, unref, watch } from 'vue'
+import { getMenuRouteListApi, loginApi } from '@/api/login'
+import { UserType } from '@/api/login/types'
 import { Form } from '@/components/Form'
-import { useI18n } from '@/hooks/web/useI18n'
-import { ElButton, ElCheckbox, ElLink } from 'element-plus'
-import { useForm } from '@/hooks/web/useForm'
-import { loginApi, getMenuRouteListApi } from '@/api/login'
 import { useCache } from '@/hooks/web/useCache'
+import { useForm } from '@/hooks/web/useForm'
+import { useI18n } from '@/hooks/web/useI18n'
+import { useValidator } from '@/hooks/web/useValidator'
 import { useAppStore } from '@/store/modules/app'
 import { usePermissionStore } from '@/store/modules/permission'
-import { useRouter } from 'vue-router'
-import type { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router'
-import { UserType } from '@/api/login/types'
-import { useValidator } from '@/hooks/web/useValidator'
 import { FormSchema } from '@/types/form'
 import * as authUtil from '@/utils/auth'
+import { ElButton, ElCheckbox, ElLink } from 'element-plus'
+import { reactive, ref, unref, watch } from 'vue'
+import type { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const { required } = useValidator()
 
@@ -111,15 +111,11 @@ const schema = reactive<FormSchema[]>([
   }
 ])
 
-const iconSize = 30
-
 const remember = ref(false)
 
 const { register, elFormRef, methods } = useForm()
 
 const loading = ref(false)
-
-const iconColor = '#999'
 
 const redirect = ref<string>('')
 
