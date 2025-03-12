@@ -16,7 +16,9 @@ import { config } from './config';
 
 const { result_code } = config
 
-export const PATH_URL = 'http://127.0.0.1:8090/api'
+// const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
+
+export const PATH_URL =  'http://localhost:8090/api'
 
 //带着cookie, 验证码放在了session里, 不加这个每次session都是新的
 axios.defaults.withCredentials = true
