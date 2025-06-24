@@ -85,7 +85,7 @@ http://43.143.194.245:8091/index.html
 
 1. git clone 当前项目到你喜欢的目录
 2. 用你喜欢的 ide 引入该项目，并加载好依赖
-3. 创建好数据库 database， 默认 money_making_machine_plus
+3. 创建好数据库 database， 默认 WIMM
 5. 启动项目: 后端运行com.z.server.BootStrapServerApplication， 前端进入z-ui-admin-vue3目录， 执行pnpm run dev(先构建)
 6. 访问http://localhost:4000， 登录查看我们的成果， 用户/密码:admin/admin
 
