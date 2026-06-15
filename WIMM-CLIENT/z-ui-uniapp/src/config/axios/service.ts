@@ -16,9 +16,9 @@ import { config } from './config';
 
 const { result_code } = config
 
-// const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:8090'
 
-export const PATH_URL =  'http://localhost:8090/api'
+export const PATH_URL = `${VITE_SERVER_URL}/api`
 
 //带着cookie, 验证码放在了session里, 不加这个每次session都是新的
 axios.defaults.withCredentials = true
@@ -62,7 +62,7 @@ service.interceptors.request.use(
   (error: AxiosError) => {
     // Do something with request error
     console.log(error) // for debug
-    Promise.reject(error)
+    return Promise.reject(error)
   }
 )
 
@@ -84,6 +84,12 @@ service.interceptors.response.use(
   },
   (error: AxiosError) => {
     console.log('err' + error.response) // for debug
+    // 401 未授权，清除 token 并跳转登录页
+    if (error.response?.status === 401) {
+      uni.removeStorageSync('token')
+      uni.removeStorageSync('username')
+      uni.redirectTo({ url: '/pages/login/login' })
+    }
     return Promise.reject(error)
   }
 )

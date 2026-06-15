@@ -11,8 +11,6 @@ import com.z.module.system.web.vo.SmsLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.*;
 
 /**
@@ -36,8 +34,6 @@ import java.util.*;
 @RequestMapping(value = {"/mobile"})
 @Slf4j
 public class MobileLoginResource {
-
-    private static final Logger logger = LoggerFactory.getLogger(MobileLoginResource.class);
 
     private final UserRepository userRepository;
 
@@ -72,13 +68,10 @@ public class MobileLoginResource {
         authedRespVO.setUsername(loginVM.getUsername());
 
         try {
-            log.info("登录用户信息 {}", loginVM);
             String username = loginVM.getUsername();
             String password = loginVM.getPassword();
             final User dbUser = userRepository.findOneByLogin(username).orElse(new User());
-            logger.info("查询用户信息 {}", dbUser);
             String dbPassWord = dbUser.getPassword();
-            logger.info("数据库密码: {}", dbPassWord);
             if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
                 String token = tokenProviderService.generateToken(username, loginVM.isRememberMe(), dbUser.getTenantId());
                 authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
@@ -88,11 +81,13 @@ public class MobileLoginResource {
                 loginLogService.save(loginVM, request);
                 return authedRespVO;
             }else{
-                log.error(String.format("登录失败, 用户: %s, 密码: %s, 数据库密码: %s", username, password, dbPassWord));
-                throw new RuntimeException(String.format("用户密码不匹配, 登录用户: %s, 密码: %s", username, password));
+                log.warn("用户 {} 密码不匹配", username);
+                throw new RuntimeException("用户名或密码错误");
             }
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            logger.error("登录出错", e);
+            log.error("登录出错", e);
             throw new RuntimeException("登录出错");
         }
     }
@@ -126,7 +121,6 @@ public class MobileLoginResource {
             authedRespVO.setUsername(user.getLogin());
 
             try {
-                log.info("登录用户信息 {}", user);
                 String username = user.getLogin();
                 String token = tokenProviderService.generateToken(username, true, user.getTenantId());
                 authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
@@ -139,11 +133,11 @@ public class MobileLoginResource {
                 loginLogService.save(loginVO, request);
                 return authedRespVO;
             } catch (Exception e) {
-                logger.error("登录出错", e);
+                log.error("登录出错", e);
                 throw new RuntimeException("登录出错");
             }
         }else{
-            log.error("登录失败, 手机号: {}", smsLoginVO.getMobile());
+            log.warn("手机号未注册: {}", smsLoginVO.getMobile());
             throw new RuntimeException("用户未注册");
         }
     }
@@ -161,13 +155,10 @@ public class MobileLoginResource {
             authedRespVO.setUsername(user.getLogin());
 
             try {
-                log.info("登录用户信息 {}", user);
                 String username = user.getLogin();
                 String password = user.getPassword();
                 final User dbUser = userRepository.findOneByLogin(username).orElse(new User());
-                logger.info("查询用户信息 {}", dbUser);
                 String dbPassWord = dbUser.getPassword();
-                logger.info("数据库密码: {}", dbPassWord);
                 if (bCryptPasswordEncoder.matches(password, dbPassWord)) {
                     String token = tokenProviderService.generateToken(username, true, dbUser.getTenantId());
                     authedRespVO.setPermissions(Collections.singletonList("*.*.*"));
@@ -180,11 +171,13 @@ public class MobileLoginResource {
                     loginLogService.save(loginVO, request);
                     return authedRespVO;
                 }else{
-                    log.error("登录失败, 用户: {}, 密码: {}, 数据库密码: {}", username, password, dbPassWord);
-                    throw new RuntimeException(String.format("用户密码不匹配, 登录用户: %s, 密码: %s", username, password));
+                    log.warn("用户 {} 密码不匹配", username);
+                    throw new RuntimeException("用户名或密码错误");
                 }
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
-                logger.error("登录出错", e);
+                log.error("登录出错", e);
                 throw new RuntimeException("登录出错");
             }
         }else{

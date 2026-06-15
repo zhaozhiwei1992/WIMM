@@ -55,9 +55,32 @@ public class CustomUserDetailService implements UserDetailsService {
             throw new UsernameNotFoundException("用户:" + username + ",不存在!");
         }
 
-        // 内部使用，没必要分那么细的权限了
-        Set<String> permissionList =
-                menuRepository.findAll().stream().map(Menu::getPermissionCode).collect(Collectors.toSet());
+        // 根据用户关联的角色查询对应的菜单权限
+        List<Long> roleIds = userAuthorityRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(UserAuthority::getRoleId)
+                .collect(Collectors.toList());
+
+        Set<String> permissionList;
+        if (roleIds.isEmpty()) {
+            log.warn("用户 {} 未分配角色", username);
+            permissionList = Set.of();
+        } else {
+            List<Long> menuIds = roleMenuRepository.findByRoleIdIn(roleIds)
+                    .stream()
+                    .map(RoleMenu::getMenuId)
+                    .collect(Collectors.toList());
+            if (menuIds.isEmpty()) {
+                log.warn("用户 {} 的角色未分配菜单权限", username);
+                permissionList = Set.of();
+            } else {
+                permissionList = menuRepository.findAllByIdInOrderByOrderNumAsc(menuIds)
+                        .stream()
+                        .map(Menu::getPermissionCode)
+                        .filter(p -> p != null && !p.isEmpty())
+                        .collect(Collectors.toSet());
+            }
+        }
         // 设置功能权限信息,方便后续校验 system:user:add之类的
         List<GrantedAuthority> grantedAuthorities = permissionList.stream()
                 .map(SimpleGrantedAuthority::new)

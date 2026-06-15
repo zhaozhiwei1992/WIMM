@@ -1,7 +1,10 @@
 package com.z.module.acct.web.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.z.module.acct.domain.AccountCls;
 import lombok.Data;
+import org.dromara.core.trans.anno.Trans;
+import org.dromara.core.trans.constant.TransType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,10 +20,11 @@ public class VoucherDetailVO implements Serializable {
     private String voucherNo; // 核算凭证号
 
     @ExcelProperty("科目编码")
-    private String acctClsCode; // 预算指标核算科目代码
+    @Trans(type = TransType.SIMPLE, target = AccountCls.class, fields = "name", ref = "acctClsName")
+    private String acctClsCode; // 预算指标核算科目代码，自动翻译为科目名称
 
     @ExcelProperty("科目名称")
-    private String acctClsName; // 预算指标核算科目名称
+    private String acctClsName; // 翻译后的科目名称（由easy-trans自动填充）
 
     @ExcelProperty("金额")
     private BigDecimal amt; // 金额

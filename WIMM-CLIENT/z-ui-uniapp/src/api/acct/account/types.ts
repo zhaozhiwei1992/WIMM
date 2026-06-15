@@ -7,7 +7,7 @@ export type AccountVO = {
   debitAccount: string
   debitAccountName: string
   amt: number
-  remkark: string
+  remark: string
   type: number
 }
 

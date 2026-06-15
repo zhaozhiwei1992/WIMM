@@ -6,16 +6,13 @@ import com.z.module.acct.repository.AccountClsRepository;
 import com.z.module.acct.repository.VoucherDetailRepository;
 import com.z.module.acct.web.vo.AccountVO;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,8 +32,7 @@ public class AccountResource {
     @Transactional
     public String acct(@RequestBody AccountVO accountVO){
 
-        long count = voucherDetailRepository.count();
-        String voucherNo = String.format("%010d", count/2);
+        String voucherNo = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
 
         List<AccountCls> accountClsList = accountClsRepository.findAllByCodeIn(Arrays.asList(accountVO.getCreditAccount(), accountVO.getDebitAccount()));
         Map<String, String> map = accountClsList.stream().collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));

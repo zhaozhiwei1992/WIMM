@@ -119,7 +119,7 @@ spring:
 #        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   datasource:
     init:
-      platform: mysql # 数据库类型
+      platform: postgres # 数据库类型
     # 指定为HikariDataSource
     type: com.zaxxer.hikari.HikariDataSource
     # hikari连接池配置
@@ -232,6 +232,17 @@ spring:
       console-available: true
   liquibase:
     enabled: true
+
+# Easy Trans 数据翻译配置
+easy-trans:
+  # 开启翻译功能
+  is-enable-global: true
+  # 开启map自动翻译
+  is-enable-map-result: true
+  # 开启平铺模式（transMap的key平铺到和vo一个级别）
+  is-enable-tile: true
+  # 翻译结果放入主对象中
+  is-enable-redis: false
 
 server:
   servlet:

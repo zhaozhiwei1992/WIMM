@@ -3,6 +3,7 @@ package com.z.module.acct.domain;
 import com.z.framework.common.domain.AbstractAuditingEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.dromara.core.trans.vo.VO;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
@@ -20,7 +21,7 @@ import java.io.Serializable;
 @Table(name = "acct_account_cls")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class AccountCls extends AbstractAuditingEntity implements Serializable {
+public class AccountCls extends AbstractAuditingEntity implements VO, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -51,4 +52,11 @@ public class AccountCls extends AbstractAuditingEntity implements Serializable {
     private String icon; // 图标
 
     private Integer orderNum; // 排序
+
+    /**
+     * 余额方向：1=借方, -1=贷方
+     * 资产、支出科目默认为借方(1)
+     * 负债、收入、净资产科目默认为贷方(-1)
+     */
+    private Integer balanceDir; // 余额方向
 }

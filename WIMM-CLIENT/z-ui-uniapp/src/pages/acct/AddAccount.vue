@@ -73,7 +73,7 @@ const form = reactive<AccountVO>({
     creditAccountName: '',
     debitAccountName: '',
     amt: 0,
-    remkark: '',
+    remark: '',
     type: 1
 })
 
@@ -83,10 +83,10 @@ const hideKeyboard = () => {
 
 const confirm = (e) => {
     if(flag.value === -1){
-        form.creditAccount = e.value[1].id
+        form.creditAccount = e.value[1].value  // 使用 value 字段获取科目代码
         form.creditAccountName = e.value[1].label
     }else if (flag.value === 1){
-        form.debitAccount = e.value[1].id
+        form.debitAccount = e.value[1].value  // 使用 value 字段获取科目代码
         form.debitAccountName = e.value[1].label
     }
     console.log('confirm', e, flag.value)

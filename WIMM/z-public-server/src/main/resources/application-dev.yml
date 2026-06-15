@@ -22,10 +22,10 @@ spring:
     serialization:
       indent-output: true
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/WIMM?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true # MySQL Connector/J 8.X 连接的示例
-    username: root
-    password: root
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/wimm # PostgreSQL 连接示例, 库名小写 wimm
+    username: wimm
+    password: wimm
   #  原文链接：https://blog.csdn.net/xupeiyan/article/details/123017184
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically

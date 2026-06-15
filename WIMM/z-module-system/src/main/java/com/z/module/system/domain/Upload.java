@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -27,9 +27,9 @@ public class Upload extends AbstractAuditingEntity implements Serializable {
     @Size(max = 256)
     private String path;
 
-    // 使用blob存储文件信息
+    // 使用二进制存储文件信息, PostgreSQL 使用 bytea 类型
     @Lob
-    @Column(columnDefinition = "MediumBlob")
+    @Column(columnDefinition = "bytea")
     private byte[] value;
 
     // 文件名

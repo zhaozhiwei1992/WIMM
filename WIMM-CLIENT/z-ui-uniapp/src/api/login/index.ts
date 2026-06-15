@@ -1,19 +1,15 @@
 import request from '@/config/axios';
-import type { SmsCodeVO, UserLoginType, UserType } from './types';
+import type { UserLoginType, UserType } from './types';
 
 export const loginApi = (data: UserLoginType): Promise<UserType>  => {
     return request.post({ url: '/mobile/login', data });
 };
 
 export const loginByWxApi = (code: string): Promise<UserType>  => {
-    return request.post({ url: '/mobile/wx/login', data: code });
+    return request.get({ url: '/system/mobile/wx/login', params: { code } });
 };
 
-export const loginByPhoneApi = (data: SmsCodeVO): Promise<UserType>  => {
-    return request.post({ url: '/mobile/login/sms', data });
-};
-
-export var loginOutApi = function () {
+export const loginOutApi = function () {
     return request.get({ url: '/mobile/loginOut' });
 };
 

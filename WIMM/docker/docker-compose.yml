@@ -1,30 +1,29 @@
-version: "3"
 services:
-  z-mysql:
-    #image: mysql:5.7.15
-    image: mysql:8.0.27
-    hostname: z-mysql
+  wimm-postgres:
+    # PostgreSQL 16, Alpine 版本体积更小
+    image: postgres:16-alpine
+    hostname: wimm-postgres
     networks:
-      - z-net
+      - wimm-net
     ports:
-      - "3306:3306"
+      - "5432:5432"
       #    restart: always
     volumes:
-      - "${HOME}/docker/mysql/data:/var/lib/mysql"
-      - "${HOME}/docker/mysql/config:/etc/mysql"
+      # PG 数据目录, 首次启动会自动初始化
+      - "${HOME}/docker/postgresql/data:/var/lib/postgresql/data"
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=root
-    command: [                        #使用 command 可以覆盖容器启动后默认执行的命令
-      '--character-set-server=utf8mb4',            #设置数据库表的数据集
-      '--collation-server=utf8mb4_unicode_ci',    #设置数据库表的数据集
-      '--default-time-zone=+8:00'                    #设置mysql数据库的 时区问题！！！！ 而不是设置容器的时区问题！！！！
-    ]
-#  z-redis:
+      # 首次启动镜像会根据以下变量自动创建数据库与用户
+      - POSTGRES_DB=wimm
+      - POSTGRES_USER=wimm
+      - POSTGRES_PASSWORD=wimm
+      # 容器时区
+      - TZ=Asia/Shanghai
+      - PGTZ=Asia/Shanghai
+#  wimm-redis:
 #    image: redis
-#    hostname: z-redis
+#    hostname: wimm-redis
 #    networks:
-#      - z-net
+#      - wimm-net
 #    ports:
 #      - "6379:6379"
 #      #    restart: always
@@ -34,5 +33,5 @@ services:
 #    command:
 #      redis-server /etc/redis/redis.conf --appendonly yes
 networks:
-  z-net:
+  wimm-net:
     driver: bridge
