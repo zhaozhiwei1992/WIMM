@@ -34,11 +34,17 @@ public class VoucherDetailService {
     }
 
     /**
-     * 分页查询凭证分录(当前家庭)
+     * 分页查询凭证分录.
+     * 家庭模式(acctCate=true): 看当前家庭所有人的明细(按 tenant_id);
+     * 个人模式(其他): 只看自己录入的明细(在 tenant_id 基础上再加 created_by).
      */
     public Map<String, Object> getAllVoucherDetail(Pageable pageable, VoucherDetail voucherDetail) {
         // 强制按当前家庭隔离
         voucherDetail.setTenantId(SecurityUtils.getTenantId());
+        // 个人模式只看自己
+        if (!isFamilyMode()) {
+            voucherDetail.setCreatedBy(SecurityUtils.getCurrentLoginName());
+        }
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
@@ -61,6 +67,13 @@ public class VoucherDetailService {
     }
 
     /**
+     * 是否家庭记账模式: 前端通过 acctCate header 传入(true=家庭, 其他=个人).
+     */
+    private boolean isFamilyMode() {
+        return "true".equalsIgnoreCase(SecurityUtils.getAcctCate());
+    }
+
+    /**
      * 按ID批量删除所属交易的整笔凭证(校验归属)
      */
     public void deleteByVoucherNo(List<Long> idList) {
@@ -77,12 +90,18 @@ public class VoucherDetailService {
     }
 
     /**
-     * 查询所有分录用于导出(当前家庭)
+     * 查询所有分录用于导出(当前家庭; 个人模式只导出自己)
      */
     public List<VoucherDetailVO> getAllForExport() {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo", "drCr");
+        String tenantId = SecurityUtils.getTenantId();
         List<VoucherDetail> all = voucherDetailRepository
-                .findAllByTenantIdOrderByCreatedDateDesc(SecurityUtils.getTenantId(), sort);
+                .findAllByTenantIdOrderByCreatedDateDesc(tenantId, sort);
+        // 个人模式只导出自己录入的
+        if (!isFamilyMode()) {
+            String me = SecurityUtils.getCurrentLoginName();
+            all = all.stream().filter(v -> Objects.equals(v.getCreatedBy(), me)).toList();
+        }
         return voucherDetailMapper.convert(all);
     }
 }
