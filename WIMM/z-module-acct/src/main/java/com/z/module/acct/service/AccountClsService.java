@@ -55,17 +55,20 @@ public class AccountClsService {
     }
 
     /**
-     * 查询当前家庭的会计科目(树形结构)
+     * 查询当前家庭的会计科目(树形结构, 前端 el-table 树形模式渲染, 默认收起)
      */
     public List<AccountClsVO> getAllAccountClsTree() {
         List<AccountCls> allList = accountClsRepository
                 .findAllByTenantIdOrderByOrderNumAsc(SecurityUtils.getTenantId());
 
-        return allList.stream().map(m -> {
+        List<AccountClsVO> collect = allList.stream().map(m -> {
             AccountClsVO vo = new AccountClsVO();
             BeanUtils.copyProperties(m, vo);
             return vo;
         }).collect(Collectors.toList());
+
+        GenericTreeBuilderUtil<AccountClsVO> treeBuilder = new GenericTreeBuilderUtil<>(AccountClsVO.class);
+        return treeBuilder.buildTree(collect);
     }
 
     /**

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.z.framework.common.repository.CommonSqlRepository;
+import com.z.framework.common.service.TenantInitializer;
 import com.z.framework.security.util.SecurityUtils;
 import com.z.module.system.domain.User;
 import com.z.module.system.domain.UserAuthority;
@@ -54,10 +55,12 @@ public class UserResource {
 
     private final UserDepartmentRepository userDepartmentRepository;
 
+    private final List<TenantInitializer> tenantInitializers;
+
     public UserResource(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder,
                         CommonSqlRepository commonSqlRepository, UserAuthorityRepository userAuthorityRepository,
                         UserPositionRepository userPositionRepository,
-                        UserDepartmentRepository userDepartmentRepository, PositionRepository positionRepository, DepartmentRepository departmentRepository) {
+                        UserDepartmentRepository userDepartmentRepository, PositionRepository positionRepository, DepartmentRepository departmentRepository, List<TenantInitializer> tenantInitializers) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -67,6 +70,7 @@ public class UserResource {
         this.userDepartmentRepository = userDepartmentRepository;
         this.positionRepository = positionRepository;
         this.departmentRepository = departmentRepository;
+        this.tenantInitializers = tenantInitializers;
     }
 
     /**
@@ -120,6 +124,15 @@ public class UserResource {
         }
 
         User newUser = userRepository.save(user);
+
+        // 新增用户(新家庭)时, 初始化各业务模块数据(如预设会计科目).
+        // 修改已有用户不重复初始化. SPI 解耦, 无实现则跳过.
+        final boolean isCreate = Objects.isNull(userVO.getId());
+        if (isCreate && tenantInitializers != null) {
+            for (TenantInitializer initializer : tenantInitializers) {
+                initializer.initialize(newUser.getTenantId());
+            }
+        }
 
         // 保存用户角色信息
         final String roleIdListStr = userVO.getRoleIdListStr();
