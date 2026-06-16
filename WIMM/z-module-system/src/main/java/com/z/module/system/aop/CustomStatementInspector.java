@@ -164,7 +164,7 @@ public class CustomStatementInspector implements StatementInspector {
                     if("true".equals(acctCate)){
                         // 家庭的去掉createBy条件, 增加tenantId条件
                         EqualsTo tenantIdWhere = new EqualsTo(new Column("tenant_id"), new StringValue(tenantId));
-                        plainSelect.setWhere(where == null ? tenantIdWhere : new AndExpression(where, tenantIdWhere));
+                        plainSelect.setWhere(where == null ? tenantIdWhere : new OrExpression(where, tenantIdWhere));
                     }else{
                         EqualsTo createByWhere = new EqualsTo(new Column("created_by"), new StringValue(currentLoginName));
                         plainSelect.setWhere(where == null ? createByWhere : new AndExpression(where, createByWhere));
