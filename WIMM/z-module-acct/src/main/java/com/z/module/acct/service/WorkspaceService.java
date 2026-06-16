@@ -7,6 +7,7 @@ import com.z.module.acct.repository.VoucherDetailRepository;
 import com.z.module.acct.web.vo.AssetVO;
 import com.z.module.acct.web.vo.LineDataVO;
 import com.z.module.acct.web.vo.PieDataVO;
+import com.z.framework.security.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +18,19 @@ import java.util.stream.Collectors;
 
 /**
  * 工作台 Service
+ * <p>
+ * 多租户隔离: 所有科目/凭证查询均限定当前家庭的 tenant_id.
+ * 一级科目通过 code(001资产/002负债/003收入/004支出) 定位, 而非固定 id,
+ * 因为每个家庭有独立的科目副本, id 各不相同.
  */
 @Service
 @Slf4j
 public class WorkspaceService {
+
+    private static final String CODE_ASSET = "001";      // 资产
+    private static final String CODE_LIABILITY = "002";  // 负债
+    private static final String CODE_INCOME = "003";     // 收入
+    private static final String CODE_EXPENSE = "004";    // 支出
 
     private final VoucherDetailRepository voucherDetailRepository;
     private final AccountClsRepository accountClsRepository;
@@ -36,23 +46,18 @@ public class WorkspaceService {
      */
     public AssetVO getAsset() {
         AssetVO assetVO = new AssetVO();
-        List<AccountCls> all = accountClsRepository.findAll();
-        Map<Long, List<AccountCls>> collect = all.stream()
-                .collect(Collectors.groupingBy(AccountCls::getParentId));
 
-        // 资产
-        List<String> assetCodes = collect.getOrDefault(1L, Collections.emptyList())
-                .stream().map(AccountCls::getCode).toList();
+        // 资产 = 一级'资产'(code=001) 下所有二级科目余额之和
+        List<String> assetCodes = childCodesOf(CODE_ASSET);
         BigDecimal totalAssets = sumAmountsByCodes(assetCodes);
         assetVO.setTotalAssets(totalAssets);
 
-        // 负债
-        List<String> liabilityCodes = collect.getOrDefault(2L, Collections.emptyList())
-                .stream().map(AccountCls::getCode).toList();
+        // 负债 = 一级'负债'(code=002) 下所有二级科目余额之和
+        List<String> liabilityCodes = childCodesOf(CODE_LIABILITY);
         BigDecimal totalLiability = sumAmountsByCodes(liabilityCodes);
         assetVO.setTotalLiabilities(totalLiability);
 
-        // 净资产
+        // 净资产 = 资产 - 负债
         assetVO.setNetWorth(totalAssets.subtract(totalLiability));
         return assetVO;
     }
@@ -61,21 +66,14 @@ public class WorkspaceService {
      * 月度收支趋势
      */
     public List<LineDataVO> getMonthlyIncExpData() {
-        List<AccountCls> all = accountClsRepository.findAll();
-        Map<Long, List<AccountCls>> collect = all.stream()
-                .collect(Collectors.groupingBy(AccountCls::getParentId));
+        String tenantId = SecurityUtils.getTenantId();
 
-        // 收入
-        List<String> incCodes = collect.getOrDefault(3L, Collections.emptyList())
-                .stream().map(AccountCls::getCode).toList();
-        List<VoucherDetail> incList = voucherDetailRepository.findAllByAcctClsCodeIn(incCodes);
+        List<String> incCodes = childCodesOf(CODE_INCOME);
+        List<VoucherDetail> incList = voucherDetailRepository.findAllByTenantIdAndAcctClsCodeIn(tenantId, incCodes);
 
-        // 支出
-        List<String> expCodes = collect.getOrDefault(4L, Collections.emptyList())
-                .stream().map(AccountCls::getCode).toList();
-        List<VoucherDetail> expList = voucherDetailRepository.findAllByAcctClsCodeIn(expCodes);
+        List<String> expCodes = childCodesOf(CODE_EXPENSE);
+        List<VoucherDetail> expList = voucherDetailRepository.findAllByTenantIdAndAcctClsCodeIn(tenantId, expCodes);
 
-        // 按月分组
         Map<String, List<VoucherDetail>> incMap = groupByMonth(incList);
         Map<String, List<VoucherDetail>> expMap = groupByMonth(expList);
 
@@ -102,17 +100,33 @@ public class WorkspaceService {
      * 收入饼图数据
      */
     public List<PieDataVO> getIncPieData() {
-        return getPieDataByParentId(3L);
+        return getPieDataByParentCode(CODE_INCOME);
     }
 
     /**
      * 支出饼图数据
      */
     public List<PieDataVO> getExpPieData() {
-        return getPieDataByParentId(4L);
+        return getPieDataByParentCode(CODE_EXPENSE);
     }
 
     // ========== 私有方法 ==========
+
+    /**
+     * 取某个一级科目(code)下所有二级科目的 code 列表(当前家庭)
+     */
+    private List<String> childCodesOf(String parentCode) {
+        String tenantId = SecurityUtils.getTenantId();
+        AccountCls parent = accountClsRepository
+                .findAllByTenantIdAndCodeIn(tenantId, List.of(parentCode))
+                .stream().findFirst().orElse(null);
+        if (parent == null) {
+            return Collections.emptyList();
+        }
+        return accountClsRepository
+                .findAllByTenantIdAndParentIdOrderByOrderNumAsc(tenantId, parent.getId())
+                .stream().map(AccountCls::getCode).toList();
+    }
 
     /**
      * 按科目代码汇总金额，区分借贷方向
@@ -120,7 +134,8 @@ public class WorkspaceService {
      */
     private BigDecimal sumAmountsByCodes(List<String> codes) {
         if (codes.isEmpty()) return BigDecimal.ZERO;
-        return voucherDetailRepository.findAllByAcctClsCodeIn(codes)
+        return voucherDetailRepository
+                .findAllByTenantIdAndAcctClsCodeIn(SecurityUtils.getTenantId(), codes)
                 .stream()
                 .map(v -> v.getDrCr() == 1 ? v.getAmt() : v.getAmt().negate())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -133,12 +148,20 @@ public class WorkspaceService {
         }));
     }
 
-    private List<PieDataVO> getPieDataByParentId(Long parentId) {
-        List<AccountCls> accountClsList = accountClsRepository.findAllByParentIdOrderByOrderNumAsc(parentId);
-        Map<String, String> nameMap = accountClsList.stream()
-                .collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));
-        List<String> codes = accountClsList.stream().map(AccountCls::getCode).toList();
-        List<VoucherDetail> voucherDetails = voucherDetailRepository.findAllByAcctClsCodeIn(codes);
+    private List<PieDataVO> getPieDataByParentCode(String parentCode) {
+        String tenantId = SecurityUtils.getTenantId();
+        List<String> codes = childCodesOf(parentCode);
+        if (codes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 科目 code -> 名称
+        Map<String, String> nameMap = accountClsRepository
+                .findAllByTenantIdAndCodeIn(tenantId, codes)
+                .stream().collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));
+
+        List<VoucherDetail> voucherDetails = voucherDetailRepository
+                .findAllByTenantIdAndAcctClsCodeIn(tenantId, codes);
 
         Map<String, List<VoucherDetail>> grouped = voucherDetails.stream()
                 .collect(Collectors.groupingBy(VoucherDetail::getAcctClsCode));

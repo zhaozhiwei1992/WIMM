@@ -12,9 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 凭证分录 Service
+ * <p>
+ * 多租户隔离: 查询/删除均限定当前家庭的 tenant_id.
+ * 不再依赖 CustomStatementInspector 的 SQL 改写(避免占位符/重写风险).
  */
 @Service
 @Slf4j
@@ -30,9 +34,12 @@ public class VoucherDetailService {
     }
 
     /**
-     * 分页查询凭证分录
+     * 分页查询凭证分录(当前家庭)
      */
     public Map<String, Object> getAllVoucherDetail(Pageable pageable, VoucherDetail voucherDetail) {
+        // 强制按当前家庭隔离
+        voucherDetail.setTenantId(SecurityUtils.getTenantId());
+
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
@@ -40,11 +47,6 @@ public class VoucherDetailService {
                 .withIgnoreNullValues()
                 .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith())
                 .withIgnorePaths("id", "createdDate", "lastModifiedDate");
-
-        String currentLoginName = SecurityUtils.getCurrentLoginName();
-        if (!"admin".equals(currentLoginName)) {
-            voucherDetail.setCreatedBy(currentLoginName);
-        }
 
         Example<VoucherDetail> ex = Example.of(voucherDetail, matcher);
 
@@ -59,20 +61,28 @@ public class VoucherDetailService {
     }
 
     /**
-     * 按凭证号批量删除分录
+     * 按ID批量删除所属交易的整笔凭证(校验归属)
      */
     public void deleteByVoucherNo(List<Long> idList) {
-        List<VoucherDetail> allById = voucherDetailRepository.findAllById(idList);
+        String tenantId = SecurityUtils.getTenantId();
+        // 仅取属于当前家庭的分录, 防止越权删除
+        List<VoucherDetail> allById = voucherDetailRepository.findAllById(idList).stream()
+                .filter(v -> Objects.equals(v.getTenantId(), tenantId))
+                .toList();
+        if (allById.isEmpty()) {
+            return;
+        }
         List<String> voucherNos = allById.stream().map(VoucherDetail::getVoucherNo).toList();
-        voucherDetailRepository.deleteAllByVoucherNoIn(voucherNos);
+        voucherDetailRepository.deleteAllByVoucherNoInAndTenantId(voucherNos, tenantId);
     }
 
     /**
-     * 查询所有分录用于导出
+     * 查询所有分录用于导出(当前家庭)
      */
     public List<VoucherDetailVO> getAllForExport() {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDate", "voucherNo", "drCr");
-        List<VoucherDetail> all = voucherDetailRepository.findAll(sort);
+        List<VoucherDetail> all = voucherDetailRepository
+                .findAllByTenantIdOrderByCreatedDateDesc(SecurityUtils.getTenantId(), sort);
         return voucherDetailMapper.convert(all);
     }
 }

@@ -151,26 +151,11 @@ public class CustomStatementInspector implements StatementInspector {
 
             // 换表
             this.replaceTable(fromTable);
-            String tenantId = TenantContext.getTenantId();
 
-            // 多租户，增加tenantId过滤
-            String currentLoginName = SecurityUtils.getCurrentLoginName();
-            if (!"admin".equals(currentLoginName)) {
-                // 对于记账明细表, 根据传入个人或者家庭, 分别拼接创建人或者租户条件
-                if (fromTable.toString().contains("acct_vou_detail")){
-                    String acctCate = SecurityUtils.getAcctCate();
-                    Expression where = plainSelect.getWhere();
-
-                    if("true".equals(acctCate)){
-                        // 家庭的去掉createBy条件, 增加tenantId条件
-                        EqualsTo tenantIdWhere = new EqualsTo(new Column("tenant_id"), new StringValue(tenantId));
-                        plainSelect.setWhere(where == null ? tenantIdWhere : new OrExpression(where, tenantIdWhere));
-                    }else{
-                        EqualsTo createByWhere = new EqualsTo(new Column("created_by"), new StringValue(currentLoginName));
-                        plainSelect.setWhere(where == null ? createByWhere : new AndExpression(where, createByWhere));
-                    }
-                }
-            }
+            // 多租户(家庭)数据隔离已下沉到 Service/Repository 层(按 tenant_id 显式查询),
+            // 不再在此处用 SQL 改写实现.
+            // 原因: jsqlparser re-serialize 会破坏 PreparedStatement 的 ? 占位符,
+            // 且原 OrExpression 拼接曾导致跨租户数据泄露.
 
             //TODO  这里可扩展
         }

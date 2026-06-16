@@ -45,8 +45,8 @@ public class AccountClsResource {
     @Operation(description = "获取所有会计科目")
     @GetMapping("/account-cls")
     @PreAuthorize("hasAuthority('acct:AccountCls:view')")
-    public HashMap<String, Object> getAllAccountCls(Pageable pageable, AccountCls accountCls) {
-        List<AccountClsVO> tree = accountClsService.getAllAccountClsTree(accountCls);
+    public HashMap<String, Object> getAllAccountCls(Pageable pageable) {
+        List<AccountClsVO> tree = accountClsService.getAllAccountClsTree();
         return new HashMap<>() {{
             put("list", tree);
             put("total", 0);

@@ -1,5 +1,6 @@
 package com.z.module.acct.web.rest;
 
+import com.z.framework.security.util.SecurityUtils;
 import com.z.module.acct.domain.AccountCls;
 import com.z.module.acct.domain.VoucherDetail;
 import com.z.module.acct.repository.AccountClsRepository;
@@ -31,11 +32,15 @@ public class AccountResource {
     @PostMapping("/account")
     @Transactional
     public String acct(@RequestBody AccountVO accountVO){
+        String tenantId = SecurityUtils.getTenantId();
 
         String voucherNo = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
 
-        List<AccountCls> accountClsList = accountClsRepository.findAllByCodeIn(Arrays.asList(accountVO.getCreditAccount(), accountVO.getDebitAccount()));
-        Map<String, String> map = accountClsList.stream().collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));
+        // 仅查询当前家庭的科目, 防止跨家庭记账
+        List<AccountCls> accountClsList = accountClsRepository.findAllByTenantIdAndCodeIn(
+                tenantId, Arrays.asList(accountVO.getCreditAccount(), accountVO.getDebitAccount()));
+        Map<String, String> map = accountClsList.stream()
+                .collect(Collectors.toMap(AccountCls::getCode, AccountCls::getName));
 
         ArrayList<VoucherDetail> voucherDetails = new ArrayList<>();
 
@@ -48,6 +53,7 @@ public class AccountResource {
             voucherDetail.setRemark(accountVO.getRemark());
             voucherDetail.setDrCr(-1);
             voucherDetail.setVoucherNo(voucherNo);
+            voucherDetail.setTenantId(tenantId);
             voucherDetails.add(voucherDetail);
         }
         {
@@ -58,6 +64,7 @@ public class AccountResource {
             voucherDetail.setRemark(accountVO.getRemark());
             voucherDetail.setDrCr(1);
             voucherDetail.setVoucherNo(voucherNo);
+            voucherDetail.setTenantId(tenantId);
             voucherDetails.add(voucherDetail);
         }
 
