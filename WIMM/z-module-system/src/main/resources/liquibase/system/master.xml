@@ -6,4 +6,5 @@
 
     <include file="liquibase/system/changelog/00000_init.sql" relativeToChangelogFile="false"/>
     <include file="liquibase/system/changelog/00001_init_admin_menu.sql" relativeToChangelogFile="false"/>
+    <include file="liquibase/system/changelog/00002_init_acct_rebuild.sql" relativeToChangelogFile="false"/>
 </databaseChangeLog>
