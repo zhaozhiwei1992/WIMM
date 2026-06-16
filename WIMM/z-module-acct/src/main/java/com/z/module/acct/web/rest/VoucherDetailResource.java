@@ -41,14 +41,14 @@ public class VoucherDetailResource {
 
     @Operation(description = "获取所有会计分录")
     @GetMapping("/voucher/detail")
-    @PreAuthorize("hasAuthority('acct:VoucherDetail:view')")
+//    @PreAuthorize("hasAuthority('acct:VoucherDetail:view')")
     public Map<String, Object> getAllVoucherDetail(Pageable pageable, VoucherDetail voucherDetail) {
         return voucherDetailService.getAllVoucherDetail(pageable, voucherDetail);
     }
 
     @Operation(description = "删除会计分录")
     @DeleteMapping("/voucher/detail")
-    @PreAuthorize("hasAuthority('acct:VoucherDetail:delete')")
+//    @PreAuthorize("hasAuthority('acct:VoucherDetail:delete')")
     public String deleteVoucherDetail(@RequestBody List<Long> idList) {
         voucherDetailService.deleteByVoucherNo(idList);
         return "success";
