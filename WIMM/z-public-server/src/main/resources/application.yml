@@ -507,9 +507,15 @@ wx:
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON
 ---
-# ai 模块
+# AI 模块: OpenAI 兼容接口(AI 记账解析用)
+# api-key 走环境变量 OPENAI_API_KEY; base-url 写死默认(可被同名环境变量覆盖)
 spring:
-  cloud:
-    ai:
-      tongyi:
-        api-key: ${DASHSCOPE_API_KEY}
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          # 结构化解析要确定性, 温度置 0
+          temperature: 0
+          model: gpt-4o-mini

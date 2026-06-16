@@ -61,5 +61,11 @@
       <groupId>org.dromara</groupId>
       <artifactId>easy-trans-jpa-sb3-extend</artifactId>
     </dependency>
+
+    <!-- Spring AI OpenAI 兼容接口 (AI 记账解析), 版本由 spring-ai-bom 管理 -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-starter-model-openai</artifactId>
+    </dependency>
   </dependencies>
 </project>

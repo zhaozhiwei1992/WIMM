@@ -5,7 +5,10 @@ import com.z.module.acct.domain.AccountCls;
 import com.z.module.acct.domain.VoucherDetail;
 import com.z.module.acct.repository.AccountClsRepository;
 import com.z.module.acct.repository.VoucherDetailRepository;
+import com.z.module.acct.service.AiBookkeepingService;
 import com.z.module.acct.web.vo.AccountVO;
+import com.z.module.acct.web.vo.AiParseRequest;
+import com.z.module.acct.web.vo.AiParseResultVO;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +25,19 @@ public class AccountResource {
 
     private final VoucherDetailRepository voucherDetailRepository;
     private final AccountClsRepository accountClsRepository;
+    private final AiBookkeepingService aiBookkeepingService;
 
-    public AccountResource(VoucherDetailRepository voucherDetailRepository, AccountClsRepository accountClsRepository) {
+    public AccountResource(VoucherDetailRepository voucherDetailRepository, AccountClsRepository accountClsRepository,
+                           AiBookkeepingService aiBookkeepingService) {
         this.voucherDetailRepository = voucherDetailRepository;
         this.accountClsRepository = accountClsRepository;
+        this.aiBookkeepingService = aiBookkeepingService;
+    }
+
+    @Operation(description = "AI 解析记账描述")
+    @PostMapping("/account/ai-parse")
+    public AiParseResultVO parseByAi(@RequestBody AiParseRequest req) {
+        return aiBookkeepingService.parse(req.getText());
     }
 
     @Operation(description = "记账")
