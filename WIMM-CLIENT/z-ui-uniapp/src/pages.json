@@ -23,6 +23,12 @@
 			}
 		},
 		{
+			"path": "pages/acct/AiBookkeeping",
+			"style": {
+				"navigationBarTitleText": "AI记账"
+			}
+		},
+		{
 			"path": "pages/login/register",
 			"style": {
 				"navigationBarTitleText": "注册"

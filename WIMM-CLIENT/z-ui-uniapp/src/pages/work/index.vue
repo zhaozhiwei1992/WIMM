@@ -7,6 +7,10 @@ const dynamicGrid = reactive([
     text: "记个账",
   },
   {
+    type: "chat-filled",
+    text: "AI记账",
+  },
+  {
     type: "download-filled",
     text: "记账导出",
   },
@@ -41,13 +45,15 @@ function changeGrid(obj) {
   if (i === 0) {
     uni.switchTab({ url: "/pages/acct/AddAccount" });
   } else if (i === 1) {
+    uni.navigateTo({ url: "/pages/acct/AiBookkeeping" });
+  } else if (i === 2) {
     // 调用后台下载记账明细数据
     exportData()
-  } else if (i === 2) {
-    importData()
   } else if (i === 3) {
-    uni.navigateTo({ url: "/pages/report/CreditAnalyze" });
+    importData()
   } else if (i === 4) {
+    uni.navigateTo({ url: "/pages/report/CreditAnalyze" });
+  } else if (i === 5) {
     uni.navigateTo({ url: "/pages/report/DebitAnalyze" });
   }
   // uni.showToast({

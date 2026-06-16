@@ -1,9 +1,14 @@
 import request from '@/config/axios'
-import type { AccountVO } from './types'
+import type { AccountVO, AiParseResultVO } from './types'
 
 export const saveApi = (data: Partial<AccountVO>): Promise<IResponse> => {
   console.log('保存到服务器')
   return request.post({ url: '/acct/account', data })
+}
+
+// AI 解析记账描述, 返回预览结构(用户确认后再调 saveApi)
+export const aiParseApi = (text: string): Promise<IResponse<AiParseResultVO>> => {
+  return request.post({ url: '/acct/account/ai-parse', data: { text } })
 }
 
 export const getTableListApi = (params: any): Promise<IResponse> => {
