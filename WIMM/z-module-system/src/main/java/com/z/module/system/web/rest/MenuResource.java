@@ -257,7 +257,7 @@ public class MenuResource {
      * ...
      */
     @GetMapping("/menus/route")
-    @PreAuthorize("hasAuthority('system:menu:view')")
+//    @PreAuthorize("hasAuthority('system:menu:view')")
     public List<Tree<Long>> getMenusRoute() {
         log.debug("REST request to get Menus Tree");
 

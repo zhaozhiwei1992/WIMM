@@ -84,10 +84,10 @@
 		"backgroundColor": "#ffffff",
 		"list": [
 			{
-				"pagePath": "pages/acct/AddAccount",
+				"pagePath": "pages/acct/AiBookkeeping",
 				"iconPath": "static/images/tabbar/home.png",
 				"selectedIconPath": "static/images/tabbar/home_.png",
-				"text": "记账"
+				"text": "AI记账"
 			},
 			{
 				"pagePath": "pages/work/index",
