@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -110,5 +113,54 @@ public class AccountClsService {
         List<SelectOptionVO> convert = accountClsSelectMapper.convert(accountClsList);
         GenericTreeBuilderUtil<SelectOptionVO> treeBuilder = new GenericTreeBuilderUtil<>(SelectOptionVO.class);
         return treeBuilder.buildTree(convert);
+    }
+
+    /**
+     * 为新家庭初始化预设科目: 从模板(tenant_id='__template__')复制一份到指定租户.
+     * <p>
+     * 复制时重新生成 id, code/name/balance_dir/层级关系保持一致;
+     * parentId 映射到复制后的新 id(一级仍指向 0).
+     * 幂等: 若该租户已有科目则跳过.
+     *
+     * @param tenantId 新家庭的租户标识
+     */
+    public void initPresetForTenant(String tenantId) {
+        // 幂等: 该家庭已有科目则不重复初始化
+        if (!accountClsRepository.findAllByTenantIdOrderByOrderNumAsc(tenantId).isEmpty()) {
+            log.info("租户 {} 已存在科目, 跳过预设初始化", tenantId);
+            return;
+        }
+
+        List<AccountCls> template = accountClsRepository
+                .findAllByTenantIdOrderByOrderNumAsc(TEMPLATE_TENANT_ID);
+        if (template.isEmpty()) {
+            log.warn("预设科目模板为空, 跳过租户 {} 初始化", tenantId);
+            return;
+        }
+
+        // 模板 id -> 新副本 id 的映射, 用于重建 parent_id 层级
+        Map<Long, Long> idMapping = new HashMap<>();
+        // 先创建全部节点(暂存新对象), 再回填 parentId
+        List<AccountCls> copies = new ArrayList<>();
+        for (AccountCls src : template) {
+            AccountCls copy = new AccountCls();
+            BeanUtils.copyProperties(src, copy);
+            copy.setId(null);       // 由数据库自增生成新 id
+            copy.setTenantId(tenantId);
+            copies.add(copy);
+        }
+        List<AccountCls> saved = accountClsRepository.saveAll(copies);
+        for (int i = 0; i < template.size(); i++) {
+            idMapping.put(template.get(i).getId(), saved.get(i).getId());
+        }
+        // 回填 parentId: 模板 parentId=0(一级) 保持不变, 否则映射到新 id
+        for (int i = 0; i < saved.size(); i++) {
+            Long srcParentId = template.get(i).getParentId();
+            Long newParentId = (srcParentId == null || srcParentId == 0L)
+                    ? srcParentId : idMapping.get(srcParentId);
+            saved.get(i).setParentId(newParentId);
+        }
+        accountClsRepository.saveAll(saved);
+        log.info("租户 {} 预设科目初始化完成, 共 {} 个", tenantId, saved.size());
     }
 }

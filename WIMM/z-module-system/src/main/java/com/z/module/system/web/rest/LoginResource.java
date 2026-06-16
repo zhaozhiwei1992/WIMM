@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.google.code.kaptcha.Constants;
 import com.z.framework.common.domain.TenantContext;
+import com.z.framework.common.service.TenantInitializer;
 import com.z.framework.security.service.TokenProviderService;
 import com.z.framework.security.util.SecurityUtils;
 import com.z.module.system.domain.Upload;
@@ -67,7 +68,9 @@ public class LoginResource {
 
     private final UserAuthorityRepository userAuthorityRepository;
 
-    public LoginResource(UserRepository userRepository, PasswordEncoder passwordEncoder, LoginLogService loginLogService, TokenProviderService tokenProviderService, LoginService loginService, UserDetailsService userDetailsService, UploadRepository uploadRepository, UserAuthorityRepository userAuthorityRepository) {
+    private final List<TenantInitializer> tenantInitializers;
+
+    public LoginResource(UserRepository userRepository, PasswordEncoder passwordEncoder, LoginLogService loginLogService, TokenProviderService tokenProviderService, LoginService loginService, UserDetailsService userDetailsService, UploadRepository uploadRepository, UserAuthorityRepository userAuthorityRepository, List<TenantInitializer> tenantInitializers) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.loginLogService = loginLogService;
@@ -76,6 +79,7 @@ public class LoginResource {
         this.userDetailsService = userDetailsService;
         this.uploadRepository = uploadRepository;
         this.userAuthorityRepository = userAuthorityRepository;
+        this.tenantInitializers = tenantInitializers;
     }
 
     /**
@@ -184,16 +188,29 @@ public class LoginResource {
 
         User newUser = userRepository.save(user);
 
+        // 分配家庭号: fam_<userId>, 回写用户
+        final Long newUserId = newUser.getId();
+        final String tenantId = "fam_" + newUserId;
+        newUser.setTenantId(tenantId);
+        userRepository.save(newUser);
+
         // 保存用户角色信息, 4:用户
         final String roleIdListStr = "4";
         final List<Long> roleIdList = Arrays.stream(roleIdListStr.split(",")).map(Long::valueOf).toList();
         final List<UserAuthority> userAuthorities = roleIdList.stream().map(roleId -> {
             final UserAuthority userAuthority = new UserAuthority();
             userAuthority.setRoleId(roleId);
-            userAuthority.setUserId(newUser.getId());
+            userAuthority.setUserId(newUserId);
             return userAuthority;
         }).collect(Collectors.toList());
         userAuthorityRepository.saveAll(userAuthorities);
+
+        // 为新家庭初始化各业务模块数据(如预设科目), SPI 解耦, 无实现则跳过
+        if (tenantInitializers != null) {
+            for (TenantInitializer initializer : tenantInitializers) {
+                initializer.initialize(tenantId);
+            }
+        }
 
         return newUser;
     }

@@ -138,3 +138,21 @@ VALUES
 
 -- 5. 预设模板用了固定 id, 重置序列避免后续自增冲突
 SELECT setval(pg_get_serial_sequence('acct_account_cls','id'), (SELECT COALESCE(MAX(id),0)+1 FROM acct_account_cls), false);
+
+-- 6. 为内置 admin 用户(id=1)预置一份家庭科目(tenant_id='fam_1'), 使其开箱即用.
+--    admin 的 tenant_id 由 00000_init.sql 维护, 这里同步补上.
+UPDATE sys_user SET tenant_id = 'fam_1' WHERE id = 1 AND tenant_id IS NULL;
+
+-- 复制模板到 fam_1 (一级 parentId 重置为 0, 二级指向新一级 id)
+INSERT INTO acct_account_cls (code, name, balance_dir, is_standard, parent_id, level_no, is_leaf, order_num, set_year, tenant_id)
+SELECT code, name, balance_dir, is_standard, 0, level_no, is_leaf, order_num, set_year, 'fam_1'
+FROM acct_account_cls WHERE tenant_id = '__template__' AND level_no = 1;
+
+-- 二级科目: parent_id 指向 fam_1 下对应的一级科目(按 code 关联)
+INSERT INTO acct_account_cls (code, name, balance_dir, is_standard, parent_id, level_no, is_leaf, order_num, set_year, tenant_id)
+SELECT t.code, t.name, t.balance_dir, t.is_standard,
+       p.id, t.level_no, t.is_leaf, t.order_num, t.set_year, 'fam_1'
+FROM acct_account_cls t
+JOIN acct_account_cls tp ON t.parent_id = tp.id AND tp.tenant_id = '__template__'
+JOIN acct_account_cls p ON p.tenant_id = 'fam_1' AND p.code = tp.code
+WHERE t.tenant_id = '__template__' AND t.level_no = 2;
