@@ -512,10 +512,10 @@ wx:
 spring:
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY}
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY:sk-12345678}
+      base-url: ${OPENAI_BASE_URL:http://10.11.12.164:4000}
       chat:
         options:
           # 结构化解析要确定性, 温度置 0
           temperature: 0
-          model: gpt-4o-mini
+          model: glm-4.7
