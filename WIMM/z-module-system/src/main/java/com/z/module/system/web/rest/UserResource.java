@@ -3,7 +3,9 @@ package com.z.module.system.web.rest;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.z.framework.common.domain.TenantConstants;
 import com.z.framework.common.repository.CommonSqlRepository;
+import com.z.framework.common.service.TenantCleanup;
 import com.z.framework.common.service.TenantInitializer;
 import com.z.framework.security.util.SecurityUtils;
 import com.z.module.system.domain.User;
@@ -57,10 +59,12 @@ public class UserResource {
 
     private final List<TenantInitializer> tenantInitializers;
 
+    private final List<TenantCleanup> tenantCleanups;
+
     public UserResource(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder,
                         CommonSqlRepository commonSqlRepository, UserAuthorityRepository userAuthorityRepository,
                         UserPositionRepository userPositionRepository,
-                        UserDepartmentRepository userDepartmentRepository, PositionRepository positionRepository, DepartmentRepository departmentRepository, List<TenantInitializer> tenantInitializers) {
+                        UserDepartmentRepository userDepartmentRepository, PositionRepository positionRepository, DepartmentRepository departmentRepository, List<TenantInitializer> tenantInitializers, List<TenantCleanup> tenantCleanups) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -71,6 +75,7 @@ public class UserResource {
         this.positionRepository = positionRepository;
         this.departmentRepository = departmentRepository;
         this.tenantInitializers = tenantInitializers;
+        this.tenantCleanups = tenantCleanups;
     }
 
     /**
@@ -251,7 +256,27 @@ public class UserResource {
     @PreAuthorize("hasAuthority('system:user:delete')")
     public String deleteUser(@RequestBody List<Long> idList) {
         log.debug("REST request to delete Examples, ids: {}", idList);
+
+        // 删除前收集受影响的家庭号(删除后无法再从用户表取到)
+        Set<String> affectedTenants = userRepository.findAllByIdIn(idList).stream()
+                .map(User::getTenantId)
+                .filter(Objects::nonNull)
+                .filter(tid -> !TenantConstants.TEMPLATE_TENANT_ID.equals(tid))
+                .collect(Collectors.toSet());
+
         this.userRepository.deleteAllByIdIn(idList);
+
+        // 删除后, 若某家庭已无任何用户, 清理其业务数据(科目/凭证)
+        if (tenantCleanups != null) {
+            for (String tenantId : affectedTenants) {
+                if (userRepository.countByTenantId(tenantId) == 0) {
+                    log.info("家庭 {} 最后一个用户已删除, 清理其业务数据", tenantId);
+                    for (TenantCleanup cleanup : tenantCleanups) {
+                        cleanup.cleanup(tenantId);
+                    }
+                }
+            }
+        }
         return "success";
     }
 

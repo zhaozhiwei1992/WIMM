@@ -188,9 +188,10 @@ public class LoginResource {
 
         User newUser = userRepository.save(user);
 
-        // 分配家庭号: fam_<userId>, 回写用户
+        // 家庭号: 优先用前端传入(支持多成员加入同一家庭), 未传则按 fam_<userId> 自动生成.
         final Long newUserId = newUser.getId();
-        final String tenantId = "fam_" + newUserId;
+        final String tenantId = StringUtils.hasText(userVO.getTenantId())
+                ? userVO.getTenantId() : "fam_" + newUserId;
         newUser.setTenantId(tenantId);
         userRepository.save(newUser);
 

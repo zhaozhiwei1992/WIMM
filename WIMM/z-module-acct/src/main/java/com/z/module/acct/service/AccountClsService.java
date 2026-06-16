@@ -1,5 +1,6 @@
 package com.z.module.acct.service;
 
+import com.z.framework.common.domain.TenantConstants;
 import com.z.framework.common.util.GenericTreeBuilderUtil;
 import com.z.framework.common.web.vo.SelectOptionVO;
 import com.z.framework.security.util.SecurityUtils;
@@ -30,8 +31,9 @@ public class AccountClsService {
 
     /**
      * 预设科目模板的租户标识, 仅供注册时复制使用, 不出现在任何业务查询结果中.
+     * 统一引用 {@link TenantConstants#TEMPLATE_TENANT_ID}.
      */
-    public static final String TEMPLATE_TENANT_ID = "__template__";
+    public static final String TEMPLATE_TENANT_ID = TenantConstants.TEMPLATE_TENANT_ID;
 
     private final AccountClsRepository accountClsRepository;
     private final AccountClsSelectMapper accountClsSelectMapper;

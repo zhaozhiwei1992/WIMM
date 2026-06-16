@@ -18,4 +18,9 @@ public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Lo
     List<VoucherDetail> findAllByTenantIdOrderByCreatedDateDesc(String tenantId, Sort sort);
 
     void deleteAllByVoucherNoInAndTenantId(Collection<String> voucherNos, String tenantId);
+
+    /**
+     * 删除某家庭的全部凭证(用于家庭清空时的资源回收).
+     */
+    void deleteAllByTenantId(String tenantId);
 }
