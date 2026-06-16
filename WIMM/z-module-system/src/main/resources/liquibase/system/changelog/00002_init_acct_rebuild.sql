@@ -140,7 +140,9 @@ VALUES
 SELECT setval(pg_get_serial_sequence('acct_account_cls','id'), (SELECT COALESCE(MAX(id),0)+1 FROM acct_account_cls), false);
 
 -- 6. 为内置 admin 用户(id=1)预置一份家庭科目(tenant_id='fam_1'), 使其开箱即用.
---    admin 的 tenant_id 由 00000_init.sql 维护, 这里同步补上.
+--    sys_user 的 tenant_id 列由 User extends AbstractAuditingEntity 引入,
+--    但 00000_init.sql 建表时未显式声明, 此处幂等补列, 不依赖 ddl-auto.
+ALTER TABLE sys_user ADD COLUMN IF NOT EXISTS tenant_id varchar(50);
 UPDATE sys_user SET tenant_id = 'fam_1' WHERE id = 1 AND tenant_id IS NULL;
 
 -- 复制模板到 fam_1 (一级 parentId 重置为 0, 二级指向新一级 id)
