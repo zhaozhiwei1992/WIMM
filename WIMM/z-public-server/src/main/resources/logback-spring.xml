@@ -6,7 +6,7 @@
     <property name="log.maxHistory" value="15" />
     <springProperty scope="context" name="catalina.base" source="server.tomcat.basedir"/>
     <!--    日志文件路径, 没有会自己创建-->
-    <property name="log.filePath" value="${java.io.tmpdir}/money-making-machine/logs"/>
+    <property name="log.filePath" value="${java.io.tmpdir}/wimm/logs"/>
 
     <property name="log.pattern.MDC"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{36} - %msg%n"/>
