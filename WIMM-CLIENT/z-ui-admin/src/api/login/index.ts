@@ -6,8 +6,12 @@ interface RoleParams {
 }
 
 // 请求时得看下是否自动增加了
+// 无状态验证码方案：getImgCodeApi 内部缓存后端下发的 captchaToken，
+// loginApi 提交时自动带上，组件层无感（跨域/反代不再依赖 session cookie）。
+let captchaToken = ''
+
 export const loginApi = (data: UserType): Promise<UserType> => {
-  return request.post({ url: '/system/login', data })
+  return request.post({ url: '/system/login', data: { ...data, captchaToken } })
   // 等价
   // const options = { data: data }
   // return request.post({ url: '/system/login', ...options })
@@ -39,11 +43,11 @@ export const getMenuRouteListApi = (params: RoleParams): Promise<AppCustomRouteR
   return request.get({ url: '/system/menus/route', params })
 }
 
-// 获取验证码
-export const getImgCodeApi = (): Promise<any> => {
-  // const options = { responseType: 'arraybuffer' }
-  const options = { responseType: 'text' }
-  return request.get({ url: '/captcha/numCode', ...options })
+// 获取验证码，返回 base64 图片串（后端实际返回 {img, captchaToken}，此处缓存 token 并只透出 img）
+export const getImgCodeApi = async (): Promise<string> => {
+  const res = await request.get({ url: '/captcha/numCode' })
+  captchaToken = res?.captchaToken || ''
+  return res?.img || ''
 }
 
 export const registerApi = (data: RegisterVO): Promise<RegisterVO> => {

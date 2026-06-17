@@ -166,6 +166,13 @@ Desktop.ini
 *.attach_*
 # Miscellaneous
 
+######################
+# Docker / Env (保留 .env.example, 忽略真实 .env 与镜像导出包)
+######################
+**/docker/.env
+**/.env.local
+*.tar
+
 # flutter ignore
 *.class
 *.log

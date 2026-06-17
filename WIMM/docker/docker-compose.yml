@@ -1,37 +1,79 @@
+# WIMM 生产部署编排（NAS 友好：不在本机编译，jar 挂载引入）
+#
+# 镜像只含 JRE（一次性构建导入），jar 不打进镜像，而是通过 volumes 挂载进容器。
+# 这样更新后端时：替换宿主机的 app.jar → docker compose restart server 即可，无需重新 build/导出镜像。
+#
+# 用法：
+#   1. 镜像（一次性，开发机构建导出，NAS 导入）：
+#        开发机: docker build -f docker/Dockerfile -t wimm-server:latest .
+#        开发机: docker save wimm-server:latest -o wimm-server.tar
+#        NAS:    docker load -i wimm-server.tar
+#   2. 把构建好的 jar 放到宿主机（JAR_PATH，见下方 .env），命名为 app.jar
+#   3. 复制 .env.example 为 .env，填入 OPENAI_API_KEY / DB_PASSWORD / JAR_PATH
+#   4. docker compose up -d
+#
+# 更新后端：重新 mvn package → 替换 JAR_PATH/app.jar → docker compose restart server
+# 详细步骤见 部署文档 06_部署运维/01_部署手册.org。
+
 services:
-  wimm-postgres:
-    # PostgreSQL 16, Alpine 版本体积更小
+  postgres:
     image: postgres:16-alpine
-    hostname: wimm-postgres
+    container_name: wimm-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-wimm}
+      POSTGRES_USER: ${DB_USER:-wimm}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-wimm}
+      TZ: Asia/Shanghai
+      PGTZ: Asia/Shanghai
+    volumes:
+      # 数据持久化；删容器不丢数据，docker compose down -v 才清空
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - wimm-net
-    ports:
-      - "5432:5432"
-      #    restart: always
-    volumes:
-      # PG 数据目录, 首次启动会自动初始化
-      - "${HOME}/docker/postgresql/data:/var/lib/postgresql/data"
+    # 不对宿主机暴露, 仅容器内网访问; 调试可放开下面两行
+    # ports:
+    #   - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-wimm} -d ${DB_NAME:-wimm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    # 运行时镜像（只含 JRE，一次性构建导入；jar 由下方 volumes 挂载，更新 jar 无需重建镜像）
+    image: wimm-server:latest
+    container_name: wimm-server
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      # 首次启动镜像会根据以下变量自动创建数据库与用户
-      - POSTGRES_DB=wimm
-      - POSTGRES_USER=wimm
-      - POSTGRES_PASSWORD=wimm
-      # 容器时区
-      - TZ=Asia/Shanghai
-      - PGTZ=Asia/Shanghai
-#  wimm-redis:
-#    image: redis
-#    hostname: wimm-redis
-#    networks:
-#      - wimm-net
-#    ports:
-#      - "6379:6379"
-#      #    restart: always
-#    volumes:
-#      - "${HOME}/docker/redis/redis.conf:/etc/redis/redis.conf"
-#      - "${HOME}/docker/redis/data:/data"
-#    command:
-#      redis-server /etc/redis/redis.conf --appendonly yes
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-wimm}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-wimm}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-wimm}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com}
+      TZ: Asia/Shanghai
+      # JVM 参数(可按 NAS 内存调整)
+      JAVA_OPTS: ${JAVA_OPTS:--Xmx512m}
+    volumes:
+      # 挂载 jar：宿主机 JAR_PATH/app.jar → 容器 /app/app.jar（ENTRYPOINT 读此文件）
+      # 更新后端：替换宿主机 jar → docker compose restart server，无需重新 build/导出镜像
+      - ${JAR_PATH:-.}/app.jar:/app/app.jar:ro
+    ports:
+      # 后端 HTTP(组网方案下, 由公网 nginx 反代到此; 证书在公网终结)
+      # 若后端直暴对外, 应在 application-prod.yml 开 ssl 走 8443
+      - "8090:8090"
+    networks:
+      - wimm-net
+
+volumes:
+  postgres_data:
+    name: wimm_postgres_data
+
 networks:
   wimm-net:
+    name: wimm-net
     driver: bridge

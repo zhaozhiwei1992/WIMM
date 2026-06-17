@@ -26,4 +26,10 @@ public class LoginVO {
     @NotNull
     private String captcha;
 
+    /**
+     * 验证码签名 token（获取验证码时后端下发，登录时回传）
+     * 无状态方案：后端据此验签比对，替代 session 存验证码
+     */
+    private String captchaToken;
+
 }

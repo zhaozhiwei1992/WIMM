@@ -3,7 +3,7 @@ package com.z.module.system.web.rest;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.google.code.kaptcha.Constants;
+import com.z.framework.captcha.service.CaptchaTokenService;
 import com.z.framework.common.domain.TenantContext;
 import com.z.framework.common.service.TenantInitializer;
 import com.z.framework.security.service.TokenProviderService;
@@ -31,7 +31,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -70,7 +69,9 @@ public class LoginResource {
 
     private final List<TenantInitializer> tenantInitializers;
 
-    public LoginResource(UserRepository userRepository, PasswordEncoder passwordEncoder, LoginLogService loginLogService, TokenProviderService tokenProviderService, LoginService loginService, UserDetailsService userDetailsService, UploadRepository uploadRepository, UserAuthorityRepository userAuthorityRepository, List<TenantInitializer> tenantInitializers) {
+    private final CaptchaTokenService captchaTokenService;
+
+    public LoginResource(UserRepository userRepository, PasswordEncoder passwordEncoder, LoginLogService loginLogService, TokenProviderService tokenProviderService, LoginService loginService, UserDetailsService userDetailsService, UploadRepository uploadRepository, UserAuthorityRepository userAuthorityRepository, List<TenantInitializer> tenantInitializers, CaptchaTokenService captchaTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.loginLogService = loginLogService;
@@ -80,6 +81,7 @@ public class LoginResource {
         this.uploadRepository = uploadRepository;
         this.userAuthorityRepository = userAuthorityRepository;
         this.tenantInitializers = tenantInitializers;
+        this.captchaTokenService = captchaTokenService;
     }
 
     /**
@@ -93,16 +95,12 @@ public class LoginResource {
     @PostMapping("/login")
     public AuthedRespVO login(@Valid @RequestBody LoginVO loginVM, HttpServletRequest request) {
 
-        // 验证码校验
-        // 1. 获取写入的验证码信息
+        // 验证码校验（无状态方案：用获取验证码时下发的 captchaToken 验签比对，不再依赖 session）
         final String captcha = loginVM.getCaptcha();
-        // 2. 获取session中验证码信息
-        final HttpSession session = request.getSession();
-        final Object attribute = session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
         final AuthedRespVO authedRespVO = new AuthedRespVO();
         authedRespVO.setUsername(loginVM.getUsername());
-        // 3. 不相同则返回登录页面
-        if(!attribute.equals(captcha)){
+        // validate 返回 null 表示：token 缺失/篡改/过期，或验证码不匹配
+        if (captchaTokenService.validate(loginVM.getCaptchaToken(), captcha) == null) {
             log.warn("验证码错误, 用户: {}", loginVM.getUsername());
             throw new RuntimeException("验证码错误");
         }

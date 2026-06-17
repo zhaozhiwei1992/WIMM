@@ -1,29 +1,26 @@
 package com.z.framework.captcha.web.rest;
 
-import com.google.code.kaptcha.Constants;
-import com.google.code.kaptcha.Producer;
+import com.z.framework.captcha.service.CaptchaTokenService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.code.kaptcha.Producer;
 
 /**
  * @Title: CaptchaController
  * @Package com/longtu/web/controller/CaptchaController.java
- * @Description: 获取验证码, 兼容rest和普通请求方式
- * 前端通过blob或者arraybuffer接收
+ * @Description: 获取验证码。无状态方案：返回 {img, captchaToken}，验证码答案以 HMAC 签名的
+ * token 下发，前端登录时回传，后端验签比对，不再依赖 session（跨域/跨端口/反代均可）。
+ * 前端通过 response.img 直接展示 base64 图片。
  * @author zhaozhiwei
  * @date 2022/8/31 上午9:35
  * @version V1.0
@@ -34,51 +31,39 @@ public class CaptchaResource {
 
     private final Producer captchaProducer;
 
-    public CaptchaResource(Producer captchaProducer) {
+    private final CaptchaTokenService captchaTokenService;
+
+    public CaptchaResource(Producer captchaProducer, CaptchaTokenService captchaTokenService) {
         this.captchaProducer = captchaProducer;
+        this.captchaTokenService = captchaTokenService;
     }
 
     /**
-     * @param request :
      * @data: 2022/8/31-上午10:09
      * @User: zhaozhiwei
      * @method: getCaptchaCode
-     * @return: org.springframework.web.servlet.ModelAndView
-     * @Description: 数字验证码 返回byte数组形式, 前端请求类型arraybuffer
+     * @Description: 数字验证码，返回 {img: base64图片, captchaToken: 验证码签名token}
+     * 前端登录时把 captchaToken 连同用户输入的验证码一起提交到 /api/system/login
      */
     @GetMapping("/captcha/numCode")
-    public ResponseEntity<String> getCaptchaCode(HttpServletRequest request) throws IOException {
-        HttpSession session = request.getSession();
+    public Map<String, String> getCaptchaCode() throws IOException {
         // 生成验证码文本
         String captchaText = captchaProducer.createText();
-        session.setAttribute(Constants.KAPTCHA_SESSION_KEY, captchaText);
-        log.info("生成验证码文本===="+captchaText);
-
         // 创建验证码图片
         BufferedImage bi = captchaProducer.createImage(captchaText);
 
-        // 将验证码图片转换为字节数组
+        // 将验证码图片转换为 base64
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(bi, "png", outputStream);
         byte[] captchaBytes = outputStream.toByteArray();
-
         String base64Image = Base64.getEncoder().encodeToString(captchaBytes);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        // 这个可以在前端通过response.headers.responsetype获取
-        headers.set("responseType", "text"); // 设置自定义的responseType头部
+        // 签发无状态 token（替代 session 存验证码）
+        String captchaToken = captchaTokenService.generate(captchaText);
 
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(base64Image);
-
-//        arraybuffer形式
-//        return ResponseEntity
-//                .ok()
-//                .headers(headers)
-//                .body(captchaBytes);
+        Map<String, String> result = new HashMap<>();
+        result.put("img", base64Image);
+        result.put("captchaToken", captchaToken);
+        return result;
     }
 }
