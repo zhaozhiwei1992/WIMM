@@ -62,6 +62,8 @@ z:
     allowed-origins:
       # 公网部署: 经 https://19921514.xyz/wimm/ 访问(admin 同源请求也会带 Origin, 必须授权)
       - https://19921514.xyz
+      # 微信小程序: 真机/线上一般不发 Origin(不触发 CORS), 但开发者工具与部分版本会带
+      - https://servicewechat.com
       # 本地开发调试(后端已改 HTTP 8091)
       - http://localhost:8091
       - https://localhost:8091
