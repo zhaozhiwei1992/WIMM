@@ -19,12 +19,13 @@
 <script>
 	// nvue 不需要引入
 	// #ifdef VUE2
-	import * as echarts from '@/uni_modules/lime-echart/static/echarts.min';
+	import * as echarts from '@/uni_modules/lime-echart/lib/echarts.min';
 	// #endif
 	// #ifdef VUE3
 	// #ifdef MP
 	// 由于vue3 使用vite 不支持umd格式的包，小程序依然可以使用，但需要使用require
-	const echarts = require('../../static/echarts.min');
+	// 注: echarts.min 已移出 static 目录(避免被 uniapp 无脑拷贝进小程序包导致超 2MB)
+	const echarts = require('../../lib/echarts.min');
 	// #endif
 	// #ifndef MP
 	// 由于 vue3 使用vite 不支持umd格式的包，故引入npm的包
