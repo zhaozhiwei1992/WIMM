@@ -42,16 +42,11 @@ spring:
   thymeleaf:
     cache: true
 server:
-  port: 8443
+  # 后端走 HTTP(8091): HTTPS 由公网 nginx 终结, 后端不再套自签证书层
+  # 之前端口冲突, 从 8090 改为 8091; nginx 反代目标也是 8091
+  port: 8091
   ssl:
-    key-store: classpath:dev.com.jks
-    #证书的密码（在生成证书的时候会指定一个密码）
-    key-store-password: 123456
-    #执行证书的类型
-    key-store-type: jks
-    # 别名
-    key-alias: dev.com
-    enabled: true
+    enabled: false
 # ===================================================================
 # Ifmis specific properties
 #
@@ -65,8 +60,11 @@ z:
     # 4000是admin-vue3, 8080: z-ui-app
 #    allowed-origins: 'http://dev.com:8090,https://dev.com:8090,http://dev.com,https://dev.com'
     allowed-origins:
-      - http://localhost:8443
-      - https://localhost:8443
+      # 公网部署: 经 https://19921514.xyz/wimm/ 访问(admin 同源请求也会带 Origin, 必须授权)
+      - https://19921514.xyz
+      # 本地开发调试(后端已改 HTTP 8091)
+      - http://localhost:8091
+      - https://localhost:8091
       - http://localhost:4173
       - https://localhost:4173
       - http://localhost:3000

@@ -63,9 +63,9 @@ services:
       # 更新后端：替换宿主机 jar → docker compose restart server，无需重新 build/导出镜像
       - ${JAR_PATH:-.}/app.jar:/app/app.jar:ro
     ports:
-      # 后端 HTTP(组网方案下, 由公网 nginx 反代到此; 证书在公网终结)
-      # 若后端直暴对外, 应在 application-prod.yml 开 ssl 走 8443
-      - "8090:8090"
+      # 后端 HTTP 8091(组网方案下, 由公网 nginx 反代到此; 证书在公网终结)
+      # 8090 之前端口冲突, 改用 8091; prod yml 端口也是 8091
+      - "8091:8091"
     networks:
       - wimm-net
 

@@ -4,11 +4,14 @@ NODE_ENV=production
 # 接口前缀, 这个变量不要改, axios通过这个作为key ,获取实际后端地址
 VITE_API_BASEPATH=pro
 
-# VITE_SERVER_URL='https://localhost:8443'
-VITE_SERVER_URL='http://10.11.12.164:8091'
+# 后端地址: 留空则用相对路径, 由公网 nginx 的 /wimm/api/ 反代到 NAS 后端
+# (同源访问 https://19921514.xyz/wimm/api/..., 避免 https 页面调 http 的混合内容拦截与跨域)
+# 注意: axios baseURL = VITE_SERVER_URL + '/api', 这里配 /wimm → /wimm/api
+VITE_SERVER_URL=/wimm
 
-# 打包路径
-VITE_BASE_PATH=/
+# 打包路径: 必须与 nginx 部署的子路径一致(带结尾斜杠)
+# 否则静态资源会 404(产物里引用 /assets/xxx, 实际需 /wimm/assets/xxx)
+VITE_BASE_PATH=/wimm/
 
 # 是否删除debugger
 VITE_DROP_DEBUGGER=true
