@@ -518,4 +518,4 @@ spring:
         options:
           # 结构化解析要确定性, 温度置 0
           temperature: 0
-          model: glm-4.7
+          model: deepseek-v3

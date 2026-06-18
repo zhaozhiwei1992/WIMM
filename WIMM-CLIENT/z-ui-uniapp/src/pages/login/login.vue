@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { loginApi, loginByWxApi } from "@/api/login";
-import type { UserLoginType } from "@/api/login/types";
-import { ref } from "vue";
+import { loginApi, loginByWxApi } from "@/api/login"
+import type { UserLoginType } from "@/api/login/types"
+import { ref } from "vue"
 
 const title = ref("欢迎回来！");
 // 登录方式切换: 'account' | 'wx'
@@ -28,7 +28,7 @@ const login = async () => {
     uni.setStorageSync("token", res.token);
     uni.setStorageSync("username", res.username || username.value);
     uni.showToast({ title: "登录成功！", icon: "none" });
-    uni.switchTab({ url: "/pages/acct/AddAccount" });
+    uni.switchTab({ url: "/pages/acct/AiBookkeeping" });
   } catch (err: any) {
     uni.showToast({
       title: err?.message || "登录失败，请检查用户名和密码",
@@ -48,7 +48,7 @@ const wxLogin = () => {
         uni.setStorageSync("token", res.token);
         uni.setStorageSync("username", res.username || "微信用户");
         uni.showToast({ title: "登录成功！", icon: "none" });
-        uni.switchTab({ url: "/pages/acct/AddAccount" });
+        uni.switchTab({ url: "/pages/acct/AiBookkeeping" });
       } catch (err: any) {
         uni.showToast({
           title: err?.message || "微信登录失败",
@@ -93,7 +93,7 @@ const wxLogin = () => {
         <view class="input-icon">🔒</view>
         <view class="line"></view>
         <input
-          type="safe-password"
+          type="password"
           name="password"
           placeholder="请输入密码"
           v-model="password"

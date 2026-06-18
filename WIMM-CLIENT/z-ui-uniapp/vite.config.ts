@@ -10,7 +10,7 @@ export default defineConfig({
             imports:[
                 // 预设
                 'vue',
-                'uni-app'                
+                'uni-app'
             ]
         })
   ],

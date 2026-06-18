@@ -1,22 +1,22 @@
 import type {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig
-} from 'axios';
+    AxiosError,
+    AxiosInstance,
+    AxiosRequestHeaders,
+    AxiosResponse,
+    InternalAxiosRequestConfig
+} from 'axios'
 
-import axios from 'axios';
+import axios from 'axios'
 
-import { UniAdapter } from "uniapp-axios-adapter";
+import { UniAdapter } from "uniapp-axios-adapter"
 
-import qs from 'qs';
+import qs from 'qs'
 
-import { config } from './config';
+import { config } from './config'
 
 const { result_code } = config
 
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:8090'
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://19921514.xyz/wimm'
 
 export const PATH_URL = `${VITE_SERVER_URL}/api`
 
@@ -94,5 +94,5 @@ service.interceptors.response.use(
   }
 )
 
-export { service };
+export { service }
 

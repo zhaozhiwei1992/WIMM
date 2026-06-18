@@ -81,7 +81,7 @@ public class MobileLoginResource {
                 loginLogService.save(loginVM, request);
                 return authedRespVO;
             }else{
-                log.warn("用户 {} 密码不匹配", username);
+                log.error("用户 {} 密码 {}不匹配", username, password);
                 throw new RuntimeException("用户名或密码错误");
             }
         } catch (RuntimeException e) {
