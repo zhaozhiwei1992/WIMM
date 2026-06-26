@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from "vue";
+import { onMounted, reactive } from "vue"
 
 const dynamicGrid = reactive([
   {
@@ -43,9 +43,9 @@ const dynamicGrid = reactive([
 function changeGrid(obj) {
   const i = obj.detail.index
   if (i === 0) {
-    uni.switchTab({ url: "/pages/acct/AddAccount" });
+    uni.navigateTo({ url: "/pages/acct/AddAccount" });
   } else if (i === 1) {
-    uni.navigateTo({ url: "/pages/acct/AiBookkeeping" });
+    uni.switchTab({ url: "/pages/acct/AiBookkeeping" });
   } else if (i === 2) {
     // 调用后台下载记账明细数据
     exportData()
@@ -70,7 +70,7 @@ const importData = () => {
 const exportData = () => {
   // 导出
   let header = {
-    'X-Access-Token': uni.getStorageSync(SET_TOKEN) 
+    'X-Access-Token': uni.getStorageSync(SET_TOKEN)
   }
 
   uni.request({
